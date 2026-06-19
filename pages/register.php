@@ -2,14 +2,14 @@
 /* 担当者:（空欄） / この画面でやること: 新規ユーザー登録フォーム（名前・メール・パスワード）。実装時はSupabase Auth（signUp）を使い、profiles テーブルにも初期レコードを作成する */
 $page_title   = '新規登録 | 大学周辺の家';
 $current_page = 'register';
-require 'includes/header.php';
+require __DIR__ . '/../includes/header.php';
 ?>
 
 <main style="max-width: 520px; margin: 3rem auto; padding: 0 1.5rem;">
 
   <div style="text-align:center; margin-bottom:2rem;">
     <h1 style="font-size:1.6rem; font-weight:700; margin-bottom:0.4rem;">新規アカウント登録</h1>
-    <p class="text-muted">既にアカウントをお持ちの方は <a href="login.php" style="color:var(--color-primary);">ログイン</a></p>
+    <p class="text-muted">既にアカウントをお持ちの方は <a href="index.php?page=login" style="color:var(--color-primary);">ログイン</a></p>
   </div>
 
   <div class="notice">
@@ -63,9 +63,9 @@ require 'includes/header.php';
   </div>
 
   <p style="text-align:center; margin-top:1.5rem; font-size:0.875rem;">
-    既にアカウントをお持ちの方は <a href="login.php" style="color:var(--color-primary); font-weight:600;">ログイン →</a>
+    既にアカウントをお持ちの方は <a href="index.php?page=login" style="color:var(--color-primary); font-weight:600;">ログイン →</a>
   </p>
 
 </main>
 
-<?php require 'includes/footer.php'; ?>
+<?php require __DIR__ . '/../includes/footer.php'; ?>

@@ -2,14 +2,14 @@
 /* 担当者:（空欄） / この画面でやること: メールアドレス＋パスワードでのログインフォーム。実装時はSupabase Auth（signInWithPassword）を使う。認証後はhome.phpへリダイレクト */
 $page_title   = 'ログイン | 大学周辺の家';
 $current_page = 'login';
-require 'includes/header.php';
+require __DIR__ . '/../includes/header.php';
 ?>
 
 <main style="max-width: 480px; margin: 3rem auto; padding: 0 1.5rem;">
 
   <div style="text-align:center; margin-bottom:2rem;">
     <h1 style="font-size:1.6rem; font-weight:700; margin-bottom:0.4rem;">ログイン</h1>
-    <p class="text-muted">アカウントをお持ちでない方は <a href="register.php" style="color:var(--color-primary);">新規登録</a></p>
+    <p class="text-muted">アカウントをお持ちでない方は <a href="index.php?page=register" style="color:var(--color-primary);">新規登録</a></p>
   </div>
 
   <div class="notice">
@@ -44,9 +44,7 @@ require 'includes/header.php';
 
     <hr class="divider">
 
-    <p style="text-align:center; font-size:0.875rem; color:var(--color-text-muted);">
-      または
-    </p>
+    <p style="text-align:center; font-size:0.875rem; color:var(--color-text-muted);">または</p>
 
     <!-- ソーシャルログインプレースホルダ -->
     <div style="display:flex; flex-direction:column; gap:0.6rem; margin-top:1rem;">
@@ -57,9 +55,9 @@ require 'includes/header.php';
   </div>
 
   <p style="text-align:center; margin-top:1.5rem; font-size:0.875rem;">
-    アカウントをお持ちでない方は <a href="register.php" style="color:var(--color-primary); font-weight:600;">新規登録 →</a>
+    アカウントをお持ちでない方は <a href="index.php?page=register" style="color:var(--color-primary); font-weight:600;">新規登録 →</a>
   </p>
 
 </main>
 
-<?php require 'includes/footer.php'; ?>
+<?php require __DIR__ . '/../includes/footer.php'; ?>

@@ -2,43 +2,41 @@
 /* 担当者:（空欄） / この画面でやること: 検索条件のフィルタバーと、エリア候補カード一覧を表示する。実装時はDBからエリアスコアを取得してカードを動的生成する */
 $page_title   = 'ホーム — エリア候補一覧 | 大学周辺の家';
 $current_page = 'home';
-require 'includes/header.php';
+$page_js      = 'home.js';
+require __DIR__ . '/../includes/header.php';
 
 /* ダミーデータ（後でDB連携に差し替え） */
 $dummy_areas = [
   [
-    'id'        => 1,
-    'name'      => '〇〇市△△区',
-    'distance'  => '12.3',
-    'time'      => '約25分',
-    'rent'      => '5.2万円〜',
-    'badges'    => ['near', 'livable'],
-    'scores'    => ['cheap' => 72, 'near' => 88, 'livable' => 81],
+    'id'       => 1,
+    'name'     => '〇〇市△△区',
+    'distance' => '12.3',
+    'time'     => '約25分',
+    'rent'     => '5.2万円〜',
+    'badges'   => ['near', 'livable'],
   ],
   [
-    'id'        => 2,
-    'name'      => '□□市◇◇町',
-    'distance'  => '8.7',
-    'time'      => '約18分',
-    'rent'      => '4.8万円〜',
-    'badges'    => ['cheap', 'near'],
-    'scores'    => ['cheap' => 85, 'near' => 91, 'livable' => 65],
+    'id'       => 2,
+    'name'     => '□□市◇◇町',
+    'distance' => '8.7',
+    'time'     => '約18分',
+    'rent'     => '4.8万円〜',
+    'badges'   => ['cheap', 'near'],
   ],
   [
-    'id'        => 3,
-    'name'      => '▲▲区××丁目',
-    'distance'  => '19.1',
-    'time'      => '約40分',
-    'rent'      => '3.9万円〜',
-    'badges'    => ['cheap'],
-    'scores'    => ['cheap' => 93, 'near' => 60, 'livable' => 74],
+    'id'       => 3,
+    'name'     => '▲▲区××丁目',
+    'distance' => '19.1',
+    'time'     => '約40分',
+    'rent'     => '3.9万円〜',
+    'badges'   => ['cheap'],
   ],
 ];
 
 $badge_labels = [
-  'cheap'   => ['label' => '安さ',      'class' => 'badge-cheap'],
-  'near'    => ['label' => '近さ',      'class' => 'badge-near'],
-  'livable' => ['label' => '住みやすさ','class' => 'badge-livable'],
+  'cheap'   => ['label' => '安さ',       'class' => 'badge-cheap'],
+  'near'    => ['label' => '近さ',       'class' => 'badge-near'],
+  'livable' => ['label' => '住みやすさ', 'class' => 'badge-livable'],
 ];
 ?>
 
@@ -51,11 +49,12 @@ $badge_labels = [
 
   <div class="notice">
     ℹ️ 現在はダミーデータを表示しています。大学情報を登録すると実際のエリアが表示されます。
-    <a href="university.php">→ 大学情報を入力</a>
+    <a href="index.php?page=university">→ 大学情報を入力</a>
   </div>
 
-  <!-- フィルタバー -->
-  <form action="" method="get">
+  <!-- フィルタバー（GETメソッドで page パラメータを維持するため hidden を使用） -->
+  <form action="index.php" method="get">
+    <input type="hidden" name="page" value="home">
     <div class="filter-bar">
       <div class="form-group">
         <label for="radius">距離（直線）</label>
@@ -123,7 +122,7 @@ $badge_labels = [
         </div>
       </div>
       <div class="area-card-footer">
-        <a href="detail.php?id=<?= $area['id'] ?>">詳細を見る →</a>
+        <a href="index.php?page=detail&id=<?= $area['id'] ?>">詳細を見る →</a>
       </div>
     </div>
     <?php endforeach; ?>
@@ -131,4 +130,4 @@ $badge_labels = [
 
 </main>
 
-<?php require 'includes/footer.php'; ?>
+<?php require __DIR__ . '/../includes/footer.php'; ?>

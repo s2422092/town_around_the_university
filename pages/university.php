@@ -2,7 +2,7 @@
 /* 担当者:（空欄） / この画面でやること: ユーザーが大学・キャンパス・希望条件（家賃・優先カテゴリ・交通手段）を入力するフォーム。実装時はPOST送信でDB保存する */
 $page_title   = '大学情報入力 | 大学周辺の家';
 $current_page = 'university';
-require 'includes/header.php';
+require __DIR__ . '/../includes/header.php';
 ?>
 
 <main>
@@ -70,18 +70,9 @@ require 'includes/header.php';
 
         <div class="form-group">
           <div class="radio-group">
-            <label>
-              <input type="radio" name="priority" value="near" checked>
-              近さ優先
-            </label>
-            <label>
-              <input type="radio" name="priority" value="cheap">
-              安さ優先
-            </label>
-            <label>
-              <input type="radio" name="priority" value="livable">
-              住みやすさ優先
-            </label>
+            <label><input type="radio" name="priority" value="near" checked> 近さ優先</label>
+            <label><input type="radio" name="priority" value="cheap"> 安さ優先</label>
+            <label><input type="radio" name="priority" value="livable"> 住みやすさ優先</label>
           </div>
         </div>
       </div>
@@ -124,4 +115,4 @@ require 'includes/header.php';
 
 </main>
 
-<?php require 'includes/footer.php'; ?>
+<?php require __DIR__ . '/../includes/footer.php'; ?>

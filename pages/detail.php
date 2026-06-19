@@ -2,7 +2,8 @@
 /* 担当者:（空欄） / この画面でやること: 特定エリア1件の詳細情報（スコア・周辺施設・地図・物件リンク）を表示する。実装時は ?id= パラメータでDBからエリア情報を取得する */
 $page_title   = 'エリア詳細 | 大学周辺の家';
 $current_page = 'home';
-require 'includes/header.php';
+$page_js      = 'detail.js';
+require __DIR__ . '/../includes/header.php';
 
 /* ダミーデータ（後でDB連携に差し替え） */
 $area = [
@@ -16,11 +17,11 @@ $area = [
 ];
 
 $pois = [
-  ['icon' => '🚔', 'type' => '交番',      'name' => '△△交番',        'distance' => '徒歩3分'],
-  ['icon' => '🌳', 'type' => '公園',      'name' => '〇〇中央公園',   'distance' => '徒歩5分'],
-  ['icon' => '🏪', 'type' => 'コンビニ',  'name' => 'コンビニ △△店', 'distance' => '徒歩2分'],
-  ['icon' => '🛒', 'type' => 'スーパー',  'name' => 'スーパー ××店', 'distance' => '徒歩7分'],
-  ['icon' => '🏥', 'type' => '病院',      'name' => '△△クリニック',  'distance' => '徒歩10分'],
+  ['icon' => '🚔', 'type' => '交番',     'name' => '△△交番',        'distance' => '徒歩3分'],
+  ['icon' => '🌳', 'type' => '公園',     'name' => '〇〇中央公園',   'distance' => '徒歩5分'],
+  ['icon' => '🏪', 'type' => 'コンビニ', 'name' => 'コンビニ △△店', 'distance' => '徒歩2分'],
+  ['icon' => '🛒', 'type' => 'スーパー', 'name' => 'スーパー ××店', 'distance' => '徒歩7分'],
+  ['icon' => '🏥', 'type' => '病院',     'name' => '△△クリニック',  'distance' => '徒歩10分'],
 ];
 ?>
 
@@ -29,7 +30,7 @@ $pois = [
   <!-- ページ上部 -->
   <div class="detail-header">
     <div>
-      <a href="home.php" style="font-size:0.85rem; color:var(--color-primary); text-decoration:none;">← エリア一覧に戻る</a>
+      <a href="index.php?page=home" style="font-size:0.85rem; color:var(--color-primary); text-decoration:none;">← エリア一覧に戻る</a>
       <h1 style="font-size:1.6rem; font-weight:700; margin-top:0.5rem;"><?= htmlspecialchars($area['name']) ?></h1>
       <p class="text-muted mt-1">
         📍 直線距離 <?= $area['distance'] ?> km &nbsp;|&nbsp;
@@ -38,7 +39,7 @@ $pois = [
       </p>
     </div>
     <div style="display:flex; gap:0.5rem; flex-wrap:wrap; align-items:center;">
-      <span class="badge badge-near" style="font-size:0.85rem; padding:0.3rem 0.75rem;">近さ ★</span>
+      <span class="badge badge-near"    style="font-size:0.85rem; padding:0.3rem 0.75rem;">近さ ★</span>
       <span class="badge badge-livable" style="font-size:0.85rem; padding:0.3rem 0.75rem;">住みやすさ ★</span>
     </div>
   </div>
@@ -62,9 +63,9 @@ $pois = [
     </div>
   </div>
 
-  <!-- 地図プレースホルダ -->
-  <div class="placeholder-map">
-    🗺️ 地図（OpenStreetMap 埋め込み予定）
+  <!-- 地図プレースホルダ（実装時: Leaflet.js + OpenStreetMap） -->
+  <div class="placeholder-map" id="map">
+    🗺️ 地図（OpenStreetMap 埋め込み予定 — detail.js で初期化）
   </div>
 
   <!-- 周辺施設 -->
@@ -132,4 +133,4 @@ $pois = [
 
 </main>
 
-<?php require 'includes/footer.php'; ?>
+<?php require __DIR__ . '/../includes/footer.php'; ?>

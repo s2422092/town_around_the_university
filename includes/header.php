@@ -5,12 +5,12 @@
  * 例: $current_page = 'home';
  */
 $pages = [
-    'index'      => ['url' => 'index.php',      'label' => 'ダッシュボード'],
-    'home'       => ['url' => 'home.php',        'label' => 'ホーム'],
-    'university' => ['url' => 'university.php',  'label' => '大学情報入力'],
-    'account'    => ['url' => 'account.php',     'label' => 'アカウント'],
-    'login'      => ['url' => 'login.php',       'label' => 'ログイン'],
-    'register'   => ['url' => 'register.php',    'label' => '新規登録'],
+    'dashboard'  => ['url' => 'index.php',                  'label' => 'ダッシュボード'],
+    'home'       => ['url' => 'index.php?page=home',        'label' => 'ホーム'],
+    'university' => ['url' => 'index.php?page=university',  'label' => '大学情報入力'],
+    'account'    => ['url' => 'index.php?page=account',     'label' => 'アカウント'],
+    'login'      => ['url' => 'index.php?page=login',       'label' => 'ログイン'],
+    'register'   => ['url' => 'index.php?page=register',    'label' => '新規登録'],
 ];
 ?>
 <!DOCTYPE html>
@@ -20,6 +20,10 @@ $pages = [
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title><?= htmlspecialchars($page_title ?? '大学周辺の家') ?></title>
   <link rel="stylesheet" href="css/style.css">
+  <script src="js/main.js" defer></script>
+  <?php if (!empty($page_js)): ?>
+    <script src="js/pages/<?= htmlspecialchars($page_js) ?>" defer></script>
+  <?php endif; ?>
 </head>
 <body>
 
@@ -41,9 +45,3 @@ $pages = [
     </nav>
   </div>
 </header>
-
-<script>
-  document.getElementById('navToggle').addEventListener('click', function () {
-    document.getElementById('globalNav').classList.toggle('open');
-  });
-</script>
