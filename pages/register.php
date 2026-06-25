@@ -1,71 +1,90 @@
 <?php
-/* 担当者:（空欄） / この画面でやること: 新規ユーザー登録フォーム（名前・メール・パスワード）。実装時はSupabase Auth（signUp）を使い、profiles テーブルにも初期レコードを作成する */
-$page_title   = '新規登録 | 大学周辺の家';
-$current_page = 'register';
-require __DIR__ . '/../includes/header.php';
+ini_set('display_errors', 1);
+ini_set('display_startup_errors', 1);
+error_reporting(E_ALL);
+session_start();
+
+// データベース接続情報
+$host = 'localhost';
+$user = 'データベース名';
+$password = 'データベースパスワード';
+$dbname = 'データベース名';
+
+// PostgreSQLへの接続
+$dbconn = pg_connect("host=$host user=$user password=$password dbname=$dbname");
+if (!$dbconn) {
+    die('データベースに接続できません: ' . pg_last_error());
+}
+
+$message = ''; // メッセージ表示用変数
+
+if ($_SERVER['REQUEST_METHOD'] == 'POST') {
+    $uname = trim($_POST['uname']);
+    $upass = trim($_POST['upass']);
+
+    if (empty($uname) || empty($upass)) {
+        $message = 'ユーザー名またはパスワードが空です。';
+    } else {
+        // ユーザー名の存在チェック
+        $check_sql = "SELECT 1 FROM users WHERE uname = $1"; // 'users' テーブルを使用
+        $check_result = pg_query_params($dbconn, $check_sql, array($uname));
+
+        if (!$check_result) {
+            $message = 'データベースエラーが発生しました。';
+        } elseif (pg_num_rows($check_result) > 0) {
+            $message = 'ユーザー名が既に存在します。別のユーザー名をお試しください。';
+        } else {
+            // パスワードのハッシュ化
+            $hashed_pass = password_hash($upass, PASSWORD_DEFAULT);
+
+            // ユーザー登録
+            $insert_sql = "INSERT INTO users (uname, upass) VALUES ($1, $2)"; // 'users' テーブルを使用
+            $result = pg_query_params($dbconn, $insert_sql, array($uname, $hashed_pass));
+
+            if ($result) {
+                $message = 'ユーザーが登録されました！ログインしてください。';
+                header('Location: login.php'); // 登録成功後、ログインページへリダイレクト
+                exit;
+            } else {
+                $message = 'ユーザー登録に失敗しました。';
+            }
+        }
+    }
+    $_SESSION['message'] = $message; // メッセージをセッションに保存
+}
+
+pg_close($dbconn);
 ?>
-
-<main style="max-width: 520px; margin: 3rem auto; padding: 0 1.5rem;">
-
-  <div style="text-align:center; margin-bottom:2rem;">
-    <h1 style="font-size:1.6rem; font-weight:700; margin-bottom:0.4rem;">新規アカウント登録</h1>
-    <p class="text-muted">既にアカウントをお持ちの方は <a href="index.php?page=login" style="color:var(--color-primary);">ログイン</a></p>
-  </div>
-
-  <div class="notice">
-    ℹ️ このフォームは見た目のみです。送信しても登録は行われません（実装予定）。
-  </div>
-
-  <div class="card">
-    <!-- action 空 = 実送信しない -->
-    <form action="" method="post">
-
-      <div class="form-group">
-        <label for="name">名前</label>
-        <input type="text" id="name" name="name"
-               placeholder="山田 太郎" autocomplete="name">
-      </div>
-
-      <div class="form-group">
-        <label for="email">メールアドレス</label>
-        <input type="email" id="email" name="email"
-               placeholder="example@mail.com" autocomplete="email">
-      </div>
-
-      <div class="form-group">
-        <label for="password">パスワード</label>
-        <input type="password" id="password" name="password"
-               placeholder="8文字以上で入力" autocomplete="new-password"
-               minlength="8">
-        <span class="form-hint">8文字以上、英数字を組み合わせることを推奨</span>
-      </div>
-
-      <div class="form-group">
-        <label for="password_confirm">パスワード（確認）</label>
-        <input type="password" id="password_confirm" name="password_confirm"
-               placeholder="もう一度入力" autocomplete="new-password">
-      </div>
-
-      <hr class="divider">
-
-      <div class="form-group">
-        <label>
-          <input type="checkbox" name="agree" id="agree" required>
-          <span style="font-weight:400;">利用規約に同意する（未作成）</span>
-        </label>
-      </div>
-
-      <button type="submit" class="btn btn-primary" style="width:100%; padding:0.75rem;">
-        アカウントを作成（未実装）
-      </button>
-
-    </form>
-  </div>
-
-  <p style="text-align:center; margin-top:1.5rem; font-size:0.875rem;">
-    既にアカウントをお持ちの方は <a href="index.php?page=login" style="color:var(--color-primary); font-weight:600;">ログイン →</a>
-  </p>
-
-</main>
-
-<?php require __DIR__ . '/../includes/footer.php'; ?>
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title> 新規登録</title>
+    <link rel="stylesheet" href="style.css">
+    <link href="https://fonts.googleapis.com/css2?family=Hachi+Maru+Pop&display=swap" rel="stylesheet">
+</head>
+<body>
+    <div class="auth-container">
+        <h2> 新規登録</h2>
+        <?php
+        if (isset($_SESSION['message'])) {
+            echo '<p class="message">' . $_SESSION['message'] . '</p>';
+            unset($_SESSION['message']);
+        }
+        ?>
+        <form action="register.php" method="POST">
+            <div class="form-group">
+                <label for="uname">ユーザー名:</label>
+                <input type="text" id="uname" name="uname" required>
+            </div>
+            <div class="form-group">
+                <label for="upass">パスワード:</label>
+                <input type="password" id="upass" name="upass" required>
+            </div>
+            <button type="submit">登録</button>
+        </form>
+        <p class="link-text">アカウントをお持ちですか？ <a href="login.php">ログインはこちら</a></p>
+    </div>
+</body>
+</html>
