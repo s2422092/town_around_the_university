@@ -4,16 +4,12 @@ ini_set('display_startup_errors', 1);
 error_reporting(E_ALL);
 session_start();
 
-// データベース接続情報
-$host = 'localhost';
-$user = 'データベース名';
-$password = 'データベースパスワード';
-$dbname = 'データベース名';
-
-// PostgreSQLへの接続
-$dbconn = pg_connect("host=$host user=$user password=$password dbname=$dbname");
-if (!$dbconn) {
-    die('データベースに接続できません: ' . pg_last_error());
+// 共通接続（.env から接続情報を読む）
+require __DIR__ . '/../db/connection.php';
+try {
+    $dbconn = db_connect();
+} catch (RuntimeException $e) {
+    die($e->getMessage());
 }
 
 $message = ''; // メッセージ表示用変数
