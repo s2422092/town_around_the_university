@@ -7,3 +7,5 @@
 # エディタ
 .vscode/
 *.swp
+.env.example
+.gitignore
