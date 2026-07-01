@@ -25,16 +25,13 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
         $result = pg_query_params($dbconn, $sql, array($uname));
 
         if (!$result) {
-            $message = 'データベースエラーが発生しました。';
+            $message = 'データベースエラーが発生しました: ' . pg_last_error($dbconn);
         } elseif (pg_num_rows($result) === 1) {
             $row = pg_fetch_assoc($result);
             if (password_verify($upass, $row['upass'])) {
                 $_SESSION['user_id'] = $row['user_id'];
                 $_SESSION['username'] = $uname;
                 $message = 'ログイン成功！';
-                // ログイン成功後のリダイレクト先を index.php に設定
-                header('Location: index.php');
-                exit;
             } else {
                 $message = 'パスワードが間違っています。';
             }
@@ -65,7 +62,7 @@ pg_close($dbconn);
             unset($_SESSION['message']);
         }
         ?>
-        <form action="login.php" method="POST">
+        <form action="?page=login" method="POST">
             <div class="form-group">
                 <label for="username">ユーザー名:</label>
                 <input type="text" id="username" name="username" required>
@@ -76,7 +73,10 @@ pg_close($dbconn);
             </div>
             <button type="submit">ログイン</button>
         </form>
-        <p class="link-text">アカウントをお持ちでないですか？ <a href="register.php">新規登録はこちら</a></p>
+        <p class="link-text">
+            <a href="index.php?page=home" class="btn btn-outline" style="display:inline-block; margin-top:0.5rem;">ホームへ移動</a>
+        </p>
+        <p class="link-text">アカウントをお持ちでないですか？ <a href="?page=register">新規登録はこちら</a></p>
     </div>
 </body>
 </html>

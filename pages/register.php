@@ -26,7 +26,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
         $check_result = pg_query_params($dbconn, $check_sql, array($uname));
 
         if (!$check_result) {
-            $message = 'データベースエラーが発生しました。';
+            $message = 'データベースエラーが発生しました: ' . pg_last_error($dbconn);
         } elseif (pg_num_rows($check_result) > 0) {
             $message = 'ユーザー名が既に存在します。別のユーザー名をお試しください。';
         } else {
@@ -39,10 +39,8 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
 
             if ($result) {
                 $message = 'ユーザーが登録されました！ログインしてください。';
-                header('Location: login.php'); // 登録成功後、ログインページへリダイレクト
-                exit;
             } else {
-                $message = 'ユーザー登録に失敗しました。';
+                $message = 'ユーザー登録に失敗しました: ' . pg_last_error($dbconn);
             }
         }
     }
@@ -69,7 +67,7 @@ pg_close($dbconn);
             unset($_SESSION['message']);
         }
         ?>
-        <form action="register.php" method="POST">
+        <form action="?page=register" method="POST">
             <div class="form-group">
                 <label for="uname">ユーザー名:</label>
                 <input type="text" id="uname" name="uname" required>
@@ -80,7 +78,7 @@ pg_close($dbconn);
             </div>
             <button type="submit">登録</button>
         </form>
-        <p class="link-text">アカウントをお持ちですか？ <a href="login.php">ログインはこちら</a></p>
+        <p class="link-text">アカウントをお持ちですか？ <a href="index.php?page=login">ログインはこちら</a></p>
     </div>
 </body>
 </html>
