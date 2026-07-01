@@ -1,12 +1,24 @@
 /* detail.js — エリア詳細ページ */
 
 document.addEventListener('DOMContentLoaded', () => {
-    initMap();
+    // Leaflet が CDN からまだ届いていない場合に少し待ってリトライする
+    if (typeof L === 'undefined') {
+        setTimeout(initMap, 300);
+    } else {
+        initMap();
+    }
     animateScores();
 });
 
 function initMap() {
-    if (typeof L === 'undefined' || !window.AREA_DATA) return;
+    const mapEl = document.getElementById('map');
+    if (!mapEl) return;
+
+    if (typeof L === 'undefined') {
+        mapEl.innerHTML = '<p style="padding:1rem;color:#64748b;">地図を読み込めませんでした。インターネット接続を確認してください。</p>';
+        return;
+    }
+    if (!window.AREA_DATA) return;
 
     const { lat, lng, name, pois, campus } = window.AREA_DATA;
 
