@@ -106,11 +106,13 @@ function mode_minutes(string $mode, float $distance_km, float $driving_min): ?in
  */
 function mode_label(string $mode): string
 {
-    return [
-        'walk'  => '🚶 徒歩',
-        'bike'  => '🚲 自転車',
-        'taxi'  => '🚕 タクシー',
-        'train' => '🚃 電車',
-        'bus'   => '🚌 バス',
-    ][$mode] ?? $mode;
+    $map = [
+        'walk'  => ['icon' => 'directions_walk', 'label' => '徒歩'],
+        'bike'  => ['icon' => 'directions_bike', 'label' => '自転車'],
+        'taxi'  => ['icon' => 'local_taxi',      'label' => 'タクシー'],
+        'train' => ['icon' => 'train',           'label' => '電車'],
+        'bus'   => ['icon' => 'directions_bus',  'label' => 'バス'],
+    ];
+    $item = $map[$mode] ?? ['icon' => 'commute', 'label' => $mode];
+    return '<span class="material-icons mi-sm">' . $item['icon'] . '</span> ' . $item['label'];
 }

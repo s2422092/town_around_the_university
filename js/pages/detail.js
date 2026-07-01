@@ -36,31 +36,31 @@ function initMap() {
         .openPopup();
 
     // 施設マーカー
-    const iconEmoji = { police: '🚔', park: '🌳', convenience: '🏪', supermarket: '🛒', hospital: '🏥' };
+    const iconName = { police: 'local_police', park: 'park', convenience: 'store', supermarket: 'shopping_cart', hospital: 'local_hospital' };
     (pois || []).forEach(poi => {
-        const emoji = iconEmoji[poi.type] || '📍';
+        const icon = iconName[poi.type] || 'place';
         const divIcon = L.divIcon({
-            html: `<span class="leaflet-poi-icon">${emoji}</span>`,
+            html: `<span class="leaflet-poi-icon material-icons">${icon}</span>`,
             className: '',
             iconSize: [28, 28],
             iconAnchor: [14, 14],
         });
         L.marker([poi.lat, poi.lng], { icon: divIcon })
             .addTo(map)
-            .bindPopup(`${emoji} <b>${poi.name}</b>`);
+            .bindPopup(`<span class="material-icons" style="vertical-align:middle;font-size:1rem;">${icon}</span> <b>${poi.name}</b>`);
     });
 
     // キャンパスマーカー + 直線
     if (campus) {
         const campusIcon = L.divIcon({
-            html: '<span class="leaflet-poi-icon">🏫</span>',
+            html: '<span class="leaflet-poi-icon material-icons">account_balance</span>',
             className: '',
             iconSize: [28, 28],
             iconAnchor: [14, 14],
         });
         L.marker([campus.lat, campus.lng], { icon: campusIcon })
             .addTo(map)
-            .bindPopup(`🏫 <b>${campus.name || '大学キャンパス'}</b>`);
+            .bindPopup(`<span class="material-icons" style="vertical-align:middle;font-size:1rem;">account_balance</span> <b>${campus.name || '大学キャンパス'}</b>`);
 
         L.polyline([[campus.lat, campus.lng], [lat, lng]], {
             color: '#2563eb',

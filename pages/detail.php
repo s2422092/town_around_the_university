@@ -216,15 +216,15 @@ require __DIR__ . '/../includes/header.php';
       <h1 style="font-size:1.6rem; font-weight:700; margin-top:0.5rem;"><?= htmlspecialchars($area['name']) ?></h1>
       <p class="text-muted mt-1">
         <?php if (!empty($scores['distance_km'])): ?>
-          📍 直線距離 <?= htmlspecialchars((string)$scores['distance_km']) ?> km &nbsp;|&nbsp;
+          <span class="icon-text"><span class="material-icons mi-xs">place</span> 直線距離 <?= htmlspecialchars((string)$scores['distance_km']) ?> km</span> &nbsp;|&nbsp;
         <?php endif; ?>
-        💴 家賃相場 <?= htmlspecialchars(format_rent($area['price_per_tatami'])) ?>
+        <span class="icon-text"><span class="material-icons mi-xs">payments</span> 家賃相場 <?= htmlspecialchars(format_rent($area['price_per_tatami'])) ?></span>
       </p>
     </div>
     <div style="display:flex; gap:0.5rem; flex-wrap:wrap; align-items:center;">
       <?php foreach ($badges as $b): ?>
         <span class="badge <?= $badge_labels[$b]['class'] ?>" style="font-size:0.85rem; padding:0.3rem 0.75rem;">
-          <?= $badge_labels[$b]['label'] ?> ★
+          <?= $badge_labels[$b]['label'] ?> <span class="material-icons mi-xs">star</span>
         </span>
       <?php endforeach; ?>
     </div>
@@ -274,9 +274,9 @@ require __DIR__ . '/../includes/header.php';
         <?php foreach ($pois as $poi):
           $meta = poi_meta($poi['type']); ?>
         <li>
-          <span class="poi-icon"><?= $meta['icon'] ?></span>
+          <span class="poi-icon material-icons mi-sm"><?= $meta['icon'] ?></span>
           <span style="flex:1;"><?= htmlspecialchars($poi['name']) ?></span>
-          <span class="text-muted"><?= $meta['label'] ?></span>
+          <span class="text-muted"><?= htmlspecialchars($meta['label']) ?></span>
         </li>
         <?php endforeach; ?>
       </ul>

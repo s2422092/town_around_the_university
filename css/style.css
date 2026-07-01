@@ -576,6 +576,23 @@ footer {
   margin-top: 0.2rem;
 }
 
+/* ===== Material Icons ===== */
+.material-icons {
+  vertical-align: middle;
+  line-height: 1;
+}
+
+.mi-lg { font-size: 2rem !important; }
+.mi-sm { font-size: 1rem !important; }
+.mi-xs { font-size: 0.9rem !important; }
+
+/* アイコン付きテキストの縦揃え */
+.icon-text {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.25rem;
+}
+
 /* ===== ユーティリティ ===== */
 .section-title {
   font-size: 1.1rem;

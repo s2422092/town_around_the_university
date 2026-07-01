@@ -108,7 +108,7 @@ require __DIR__ . '/../includes/header.php';
 
   <?php if (!$use_db): ?>
     <div class="notice">
-      ℹ️ 現在はダミーデータを表示しています。大学情報を登録すると実際のエリアが表示されます。
+      <span class="material-icons mi-sm">info</span> 現在はダミーデータを表示しています。大学情報を登録すると実際のエリアが表示されます。
       <a href="index.php?page=university">→ 大学情報を入力</a>
     </div>
   <?php elseif ($db_error): ?>
@@ -117,14 +117,14 @@ require __DIR__ . '/../includes/header.php';
     </div>
   <?php else: ?>
     <div class="notice" style="background:#dcfce7;border-color:#86efac;color:#166534;">
-      📍 <?= htmlspecialchars($registered['university_name']) ?>
+      <span class="material-icons mi-sm">place</span> <?= htmlspecialchars($registered['university_name']) ?>
       <?= htmlspecialchars($registered['campus_name']) ?> 周辺のエリアを表示しています。
     </div>
   <?php endif; ?>
 
   <?php if ($transport_deferred): ?>
     <div class="notice">
-      ℹ️ 電車・バスの所要時間は今後対応予定です。現在は徒歩・自転車・タクシーのみ通学時間を算出します。
+      <span class="material-icons mi-sm">info</span> 電車・バスの所要時間は今後対応予定です。現在は徒歩・自転車・タクシーのみ通学時間を算出します。
     </div>
   <?php endif; ?>
 
@@ -182,16 +182,16 @@ require __DIR__ . '/../includes/header.php';
   <div class="card-grid">
     <?php foreach ($display_areas as $area): ?>
     <div class="area-card">
-      <div class="area-card-img">🏘️</div>
+      <div class="area-card-img"><span class="material-icons" style="font-size:3rem;">location_city</span></div>
       <div class="area-card-body">
         <div class="area-card-title"><?= htmlspecialchars($area['name']) ?></div>
         <div class="area-card-meta">
-          <span>📍 直線距離 <?= htmlspecialchars($area['distance']) ?> km</span>
+          <span class="icon-text"><span class="material-icons mi-xs">place</span> 直線距離 <?= htmlspecialchars($area['distance']) ?> km</span>
           <?php if (!empty($area['commute_min'])): ?>
-            <span><?= htmlspecialchars(mode_label($area['commute_mode'])) ?> 通学時間 約<?= (int) $area['commute_min'] ?>分</span>
+            <span class="icon-text"><?= mode_label($area['commute_mode']) ?> 通学時間 約<?= (int) $area['commute_min'] ?>分</span>
           <?php endif; ?>
-          <span>💴 家賃相場 <?= htmlspecialchars($area['rent']) ?></span>
-          <span>🏪 周辺施設 <?= (int) $area['poi'] ?> 件</span>
+          <span class="icon-text"><span class="material-icons mi-xs">payments</span> 家賃相場 <?= htmlspecialchars($area['rent']) ?></span>
+          <span class="icon-text"><span class="material-icons mi-xs">store</span> 周辺施設 <?= (int) $area['poi'] ?> 件</span>
         </div>
         <div class="badge-row">
           <?php foreach ($area['badges'] as $b): ?>

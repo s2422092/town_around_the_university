@@ -2,16 +2,16 @@
 require_once __DIR__ . '/geocode.php';
 
 const POI_META = [
-    'police'      => ['icon' => '🚔', 'label' => '交番・警察署'],
-    'park'        => ['icon' => '🌳', 'label' => '公園'],
-    'convenience' => ['icon' => '🏪', 'label' => 'コンビニ'],
-    'supermarket' => ['icon' => '🛒', 'label' => 'スーパー'],
-    'hospital'    => ['icon' => '🏥', 'label' => '病院・クリニック'],
+    'police'      => ['icon' => 'local_police',  'label' => '交番・警察署'],
+    'park'        => ['icon' => 'park',           'label' => '公園'],
+    'convenience' => ['icon' => 'store',          'label' => 'コンビニ'],
+    'supermarket' => ['icon' => 'shopping_cart',  'label' => 'スーパー'],
+    'hospital'    => ['icon' => 'local_hospital', 'label' => '病院・クリニック'],
 ];
 
 function poi_meta(string $type): array
 {
-    return POI_META[$type] ?? ['icon' => '📍', 'label' => $type];
+    return POI_META[$type] ?? ['icon' => 'place', 'label' => $type];
 }
 
 /**

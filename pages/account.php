@@ -120,34 +120,34 @@ require __DIR__ . '/../includes/header.php';
     <?php if ($registered !== null): ?>
       <div class="feature-grid" style="margin-bottom:1rem;">
         <div class="feature-card">
-          <div class="icon">🎓</div>
+          <div class="icon"><span class="material-icons mi-lg">school</span></div>
           <h3>大学</h3>
           <p><?= htmlspecialchars($registered['university_name']) ?></p>
         </div>
         <div class="feature-card">
-          <div class="icon">🏫</div>
+          <div class="icon"><span class="material-icons mi-lg">account_balance</span></div>
           <h3>キャンパス</h3>
           <p><?= htmlspecialchars($registered['campus_name']) ?></p>
         </div>
         <div class="feature-card">
-          <div class="icon">💴</div>
+          <div class="icon"><span class="material-icons mi-lg">payments</span></div>
           <h3>家賃上限</h3>
           <p><?= $registered['rent_max'] !== null
               ? number_format($registered['rent_max'] / 10000, 0) . ' 万円'
               : '上限なし' ?></p>
         </div>
         <div class="feature-card">
-          <div class="icon">⭐</div>
+          <div class="icon"><span class="material-icons mi-lg">star</span></div>
           <h3>優先カテゴリ</h3>
           <p><?= htmlspecialchars($badge_labels[$registered['priority']] ?? '近さ優先') ?></p>
         </div>
         <div class="feature-card">
-          <div class="icon">📍</div>
+          <div class="icon"><span class="material-icons mi-lg">place</span></div>
           <h3>検索範囲</h3>
           <p><?= (int)($registered['radius'] ?? 20) ?> km 以内</p>
         </div>
         <div class="feature-card">
-          <div class="icon">🚃</div>
+          <div class="icon"><span class="material-icons mi-lg">train</span></div>
           <h3>交通手段</h3>
           <p><?php
             $sel = array_map(fn($t) => $transport_labels[$t] ?? $t, (array)($registered['transport'] ?? []));

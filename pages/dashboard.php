@@ -46,7 +46,8 @@ require __DIR__ . '/../includes/header.php';
 
   <?php if (isset($_GET['registered'])): ?>
     <div class="notice" style="background:#dcfce7;border-color:#86efac;color:#166534;">
-      ✅ 「<?= htmlspecialchars($registered['university_name']) ?>
+      <span class="material-icons mi-sm" style="color:#166534;">check_circle</span>
+      「<?= htmlspecialchars($registered['university_name']) ?>
       <?= htmlspecialchars($registered['campus_name']) ?>」を登録しました。
       <?php if (isset($_GET['geo']) && $_GET['geo'] === '0'): ?>
         <br>※ 住所から位置情報を取得できなかったため、エリア候補は表示されません。住所を見直して再登録してください。
@@ -58,7 +59,7 @@ require __DIR__ . '/../includes/header.php';
   <section class="hero-section">
     <h1><?= htmlspecialchars($registered['university_name']) ?> 周辺のエリアを探す</h1>
     <p>
-      📍 <?= htmlspecialchars($registered['campus_name']) ?>
+      <span class="material-icons mi-sm">place</span> <?= htmlspecialchars($registered['campus_name']) ?>
       （<?= htmlspecialchars($registered['campus_address']) ?>）
     </p>
     <div class="hero-actions">
@@ -72,24 +73,24 @@ require __DIR__ . '/../includes/header.php';
     <h2 class="section-title">登録した希望条件</h2>
     <div class="feature-grid">
       <div class="feature-card">
-        <div class="icon">💴</div>
+        <div class="icon"><span class="material-icons mi-lg">payments</span></div>
         <h3>家賃上限</h3>
         <p><?= $registered['rent_max'] !== null
             ? number_format($registered['rent_max'] / 10000, 0) . ' 万円'
             : '上限なし' ?></p>
       </div>
       <div class="feature-card">
-        <div class="icon">⭐</div>
+        <div class="icon"><span class="material-icons mi-lg">star</span></div>
         <h3>優先カテゴリ</h3>
         <p><?= htmlspecialchars($badge_labels[$registered['priority']]['label'] ?? '近さ') ?>優先</p>
       </div>
       <div class="feature-card">
-        <div class="icon">📍</div>
+        <div class="icon"><span class="material-icons mi-lg">place</span></div>
         <h3>検索範囲</h3>
         <p><?= (int) ($registered['radius'] ?? 20) ?> km 以内</p>
       </div>
       <div class="feature-card">
-        <div class="icon">🚃</div>
+        <div class="icon"><span class="material-icons mi-lg">train</span></div>
         <h3>交通手段</h3>
         <p><?php
           $tlabels = ['train' => '電車', 'bus' => 'バス', 'bike' => '自転車', 'walk' => '徒歩', 'taxi' => 'タクシー'];
@@ -116,13 +117,13 @@ require __DIR__ . '/../includes/header.php';
       <div class="card-grid">
         <?php foreach ($top_areas as $area): ?>
         <div class="area-card">
-          <div class="area-card-img">🏘️</div>
+          <div class="area-card-img"><span class="material-icons" style="font-size:3rem;">location_city</span></div>
           <div class="area-card-body">
             <div class="area-card-title"><?= htmlspecialchars($area['name']) ?></div>
             <div class="area-card-meta">
-              <span>📍 直線距離 <?= htmlspecialchars($area['distance_km']) ?> km</span>
-              <span>💴 家賃相場 <?= htmlspecialchars(format_rent($area['price_per_tatami'])) ?></span>
-              <span>🏪 周辺施設 <?= (int) $area['poi_count'] ?> 件</span>
+              <span class="icon-text"><span class="material-icons mi-xs">place</span> 直線距離 <?= htmlspecialchars($area['distance_km']) ?> km</span>
+              <span class="icon-text"><span class="material-icons mi-xs">payments</span> 家賃相場 <?= htmlspecialchars(format_rent($area['price_per_tatami'])) ?></span>
+              <span class="icon-text"><span class="material-icons mi-xs">store</span> 周辺施設 <?= (int) $area['poi_count'] ?> 件</span>
             </div>
             <div class="badge-row">
               <?php foreach ($area['badges'] as $b): ?>
@@ -158,32 +159,32 @@ require __DIR__ . '/../includes/header.php';
     <h2 class="section-title">このサービスでできること</h2>
     <div class="feature-grid">
       <div class="feature-card">
-        <div class="icon">🎓</div>
+        <div class="icon"><span class="material-icons mi-lg">school</span></div>
         <h3>大学・キャンパス登録</h3>
         <p>通学元のキャンパスを登録して、距離・時間を自動計算</p>
       </div>
       <div class="feature-card">
-        <div class="icon">📍</div>
+        <div class="icon"><span class="material-icons mi-lg">place</span></div>
         <h3>距離で絞り込み</h3>
         <p>直線距離 10 / 20 / 30 km の半径でエリアを絞れます</p>
       </div>
       <div class="feature-card">
-        <div class="icon">🚃</div>
+        <div class="icon"><span class="material-icons mi-lg">train</span></div>
         <h3>交通手段を選択</h3>
         <p>電車・バス・自転車・徒歩・タクシーの所要時間を比較</p>
       </div>
       <div class="feature-card">
-        <div class="icon">💴</div>
+        <div class="icon"><span class="material-icons mi-lg">payments</span></div>
         <h3>家賃相場で比較</h3>
         <p>エリアごとの家賃相場を表示。希望家賃でフィルタも可能</p>
       </div>
       <div class="feature-card">
-        <div class="icon">🏪</div>
+        <div class="icon"><span class="material-icons mi-lg">store</span></div>
         <h3>住みやすさスコア</h3>
         <p>コンビニ・公園・交番などの周辺施設から算出したスコア</p>
       </div>
       <div class="feature-card">
-        <div class="icon">🔗</div>
+        <div class="icon"><span class="material-icons mi-lg">open_in_new</span></div>
         <h3>物件ポータルへ誘導</h3>
         <p>SUUMO・HOME'S などへのリンクをエリアごとに自動生成</p>
       </div>

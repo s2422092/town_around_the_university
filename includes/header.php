@@ -29,6 +29,7 @@ if ($_logged_in) {
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title><?= htmlspecialchars($page_title ?? '大学周辺の家') ?></title>
   <link rel="stylesheet" href="css/style.css">
+  <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
   <script src="js/main.js" defer></script>
   <?php if (!empty($page_js)): ?>
     <script src="js/pages/<?= htmlspecialchars($page_js) ?>" defer></script>
