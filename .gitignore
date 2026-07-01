@@ -1,2 +1,10 @@
 cache/
 .DS_Store
+
+# 環境変数ファイル（各自のローカル設定 — コミット禁止）
+.env
+.env.example
+
+# エディタ
+.vscode/
+*.swp

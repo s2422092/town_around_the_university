@@ -196,4 +196,19 @@ COMMENT ON TABLE favorites IS 'ユーザーのお気に入りエリア';
 
 CREATE INDEX IF NOT EXISTS idx_favorites_user_id ON favorites(user_id);
 
+
+-- --------------------------------------------------
+-- 11. users（ローカル認証用 — login.php / register.php で使用）
+--     Supabase Auth を使わずにローカル DB で認証する場合のテーブル。
+--     パスワードは PHP の password_hash() で bcrypt ハッシュ化して保存する。
+-- --------------------------------------------------
+CREATE TABLE IF NOT EXISTS users (
+    user_id SERIAL       PRIMARY KEY,
+    uname   VARCHAR(100) UNIQUE NOT NULL,
+    upass   TEXT         NOT NULL   -- password_hash() による bcrypt ハッシュ
+);
+
+COMMENT ON TABLE  users       IS 'ローカル認証用ユーザーテーブル（login.php / register.php が参照）';
+COMMENT ON COLUMN users.upass IS 'password_hash(PASSWORD_DEFAULT) で生成した bcrypt ハッシュ';
+
 COMMIT;
