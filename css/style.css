@@ -555,6 +555,27 @@ footer {
   margin-bottom: 1.5rem;
 }
 
+.area-map {
+  height: 340px;
+  border-radius: var(--radius);
+  border: 1px solid var(--color-border);
+  box-shadow: var(--shadow);
+  overflow: hidden;
+}
+
+.leaflet-poi-icon {
+  font-size: 1.35rem;
+  line-height: 1;
+  display: block;
+  text-align: center;
+}
+
+.score-sub {
+  font-size: 0.72rem;
+  color: var(--color-text-muted);
+  margin-top: 0.2rem;
+}
+
 /* ===== ユーティリティ ===== */
 .section-title {
   font-size: 1.1rem;

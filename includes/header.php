@@ -24,6 +24,7 @@ $pages = [
   <?php if (!empty($page_js)): ?>
     <script src="js/pages/<?= htmlspecialchars($page_js) ?>" defer></script>
   <?php endif; ?>
+  <?php if (!empty($extra_head)) echo $extra_head; ?>
 </head>
 <body>
 
