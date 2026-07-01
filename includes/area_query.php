@@ -22,7 +22,10 @@
  * @param  int      $limit     最大件数
  * @return array<int, array<string, mixed>> エリア行の配列
  */
-function ranked_areas($db, float $lat, float $lng, int $radius_km = 20, string $priority = 'near', int $limit = 12): array
+/**
+ * @param  int|null $rent_max 月額家賃上限（円）。null = 上限なし
+ */
+function ranked_areas($db, float $lat, float $lng, int $radius_km = 20, string $priority = 'near', int $limit = 12, ?int $rent_max = null): array
 {
     // 優先順位ごとの並び替え。距離は常にタイブレークに使う。
     $order = match ($priority) {
@@ -61,9 +64,18 @@ function ranked_areas($db, float $lat, float $lng, int $radius_km = 20, string $
     SQL;
 
     // 距離フィルタは計算列を使うのでサブクエリでラップする
-    $wrapped = "SELECT * FROM ($sql) t WHERE distance_km <= $3 ORDER BY $order LIMIT $4";
+    // rent_max が指定されている場合: price_per_tatami * 16 ≒ ワンルーム月額家賃
+    $rent_clause = '';
+    $params      = [$lat, $lng, $radius_km, $limit];
+    if ($rent_max !== null) {
+        $params[]    = $rent_max;
+        $idx         = count($params);
+        $rent_clause = "AND (price_per_tatami IS NULL OR price_per_tatami * 16 <= \${$idx})";
+    }
 
-    $result = pg_query_params($db, $wrapped, [$lat, $lng, $radius_km, $limit]);
+    $wrapped = "SELECT * FROM ($sql) t WHERE distance_km <= \$3 $rent_clause ORDER BY $order LIMIT \$4";
+
+    $result = pg_query_params($db, $wrapped, $params);
     if (!$result) {
         return [];
     }

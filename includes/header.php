@@ -4,14 +4,23 @@
  * 各ページで $current_page を定義してからインクルードすること。
  * 例: $current_page = 'home';
  */
-$pages = [
-    'dashboard'  => ['url' => 'index.php',                  'label' => 'ダッシュボード'],
-    'home'       => ['url' => 'index.php?page=home',        'label' => 'ホーム'],
-    'university' => ['url' => 'index.php?page=university',  'label' => '大学情報入力'],
-    'account'    => ['url' => 'index.php?page=account',     'label' => 'アカウント'],
-    'login'      => ['url' => 'index.php?page=login',       'label' => 'ログイン'],
-    'register'   => ['url' => 'index.php?page=register',    'label' => '新規登録'],
-];
+$_logged_in = !empty($_SESSION['user_id']);
+
+if ($_logged_in) {
+    $pages = [
+        'dashboard'  => ['url' => 'index.php',                 'label' => 'ダッシュボード'],
+        'home'       => ['url' => 'index.php?page=home',       'label' => 'ホーム'],
+        'university' => ['url' => 'index.php?page=university', 'label' => '大学情報'],
+        'account'    => ['url' => 'index.php?page=account',    'label' => 'アカウント'],
+    ];
+} else {
+    $pages = [
+        'dashboard'  => ['url' => 'index.php',                 'label' => 'トップ'],
+        'home'       => ['url' => 'index.php?page=home',       'label' => 'エリアを見る'],
+        'login'      => ['url' => 'index.php?page=login',      'label' => 'ログイン'],
+        'register'   => ['url' => 'index.php?page=register',   'label' => '新規登録'],
+    ];
+}
 ?>
 <!DOCTYPE html>
 <html lang="ja">
@@ -43,6 +52,11 @@ $pages = [
           <?= $page['label'] ?>
         </a>
       <?php endforeach; ?>
+      <?php if ($_logged_in): ?>
+        <a href="index.php?page=logout"
+           style="color:#fca5a5;"
+           onclick="return confirm('ログアウトしますか？')">ログアウト</a>
+      <?php endif; ?>
     </nav>
   </div>
 </header>

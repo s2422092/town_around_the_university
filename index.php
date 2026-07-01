@@ -7,6 +7,14 @@
  */
 $page = trim($_GET['page'] ?? 'dashboard');
 
+// ログアウト処理
+if ($page === 'logout') {
+    session_start();
+    session_destroy();
+    header('Location: index.php');
+    exit;
+}
+
 $allowed_pages = [
     'dashboard',
     'home',

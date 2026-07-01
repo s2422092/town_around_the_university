@@ -27,13 +27,15 @@ if ($use_db) {
     require __DIR__ . '/../includes/routing.php';
     try {
         $db = db_connect();
+        $rent_max_val = ($filter['rent_max'] !== '') ? (int)$filter['rent_max'] : null;
         $rows = ranked_areas(
             $db,
             (float) $registered['lat'],
             (float) $registered['lng'],
             (int) $filter['radius'],
             in_array($filter['priority'], ['near', 'cheap', 'livable'], true) ? $filter['priority'] : 'near',
-            12
+            12,
+            $rent_max_val
         );
         pg_close($db);
 

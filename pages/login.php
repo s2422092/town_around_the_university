@@ -1,82 +1,92 @@
 <?php
-ini_set('display_errors', 1);
-ini_set('display_startup_errors', 1);
-error_reporting(E_ALL);
 session_start();
 
-// 共通接続（.env から接続情報を読む）
-require __DIR__ . '/../db/connection.php';
-try {
-    $dbconn = db_connect();
-} catch (RuntimeException $e) {
-    die($e->getMessage());
+if (!empty($_SESSION['user_id'])) {
+    header('Location: index.php');
+    exit;
 }
 
-$message = ''; // メッセージ表示用変数
+require __DIR__ . '/../db/connection.php';
 
-if ($_SERVER['REQUEST_METHOD'] == 'POST') {
-    $uname = trim($_POST['username']); // HTMLフォームのname属性に合わせて変更
-    $upass = trim($_POST['password']); // HTMLフォームのname属性に合わせて変更
+$page_title   = 'ログイン | 大学周辺の家';
+$current_page = 'login';
 
-    if (empty($uname) || empty($upass)) {
-        $message = 'ユーザー名またはパスワードが空です。';
+$message = '';
+$error   = false;
+
+if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+    $uname = trim($_POST['username'] ?? '');
+    $upass = trim($_POST['password'] ?? '');
+
+    if ($uname === '' || $upass === '') {
+        $message = 'ユーザー名またはパスワードを入力してください。';
+        $error   = true;
     } else {
-        $sql = "SELECT user_id, upass FROM users WHERE uname = $1"; // 'users' テーブルを使用
-        $result = pg_query_params($dbconn, $sql, array($uname));
-
-        if (!$result) {
-            $message = 'データベースエラーが発生しました: ' . pg_last_error($dbconn);
-        } elseif (pg_num_rows($result) === 1) {
-            $row = pg_fetch_assoc($result);
-            if (password_verify($upass, $row['upass'])) {
-                $_SESSION['user_id'] = $row['user_id'];
-                $_SESSION['username'] = $uname;
-                $message = 'ログイン成功！';
-            } else {
-                $message = 'パスワードが間違っています。';
+        try {
+            $db  = db_connect();
+            $res = pg_query_params($db, 'SELECT user_id, upass FROM users WHERE uname = $1', [$uname]);
+            if ($res && pg_num_rows($res) === 1) {
+                $row = pg_fetch_assoc($res);
+                if (password_verify($upass, $row['upass'])) {
+                    $_SESSION['user_id']  = (int)$row['user_id'];
+                    $_SESSION['username'] = $uname;
+                    pg_close($db);
+                    header('Location: index.php');
+                    exit;
+                }
             }
-        } else {
-            $message = 'ユーザー名が見つかりません。';
+            pg_close($db);
+            $message = 'ユーザー名またはパスワードが正しくありません。';
+            $error   = true;
+        } catch (RuntimeException $e) {
+            $message = 'データベースに接続できませんでした。';
+            $error   = true;
         }
     }
-    $_SESSION['message'] = $message; // メッセージをセッションに保存
 }
 
-pg_close($dbconn);
+require __DIR__ . '/../includes/header.php';
 ?>
-<!DOCTYPE html>
-<html lang="ja">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title> ログイン</title>
-    <link rel="stylesheet" href="style.css">
-    <link href="https://fonts.googleapis.com/css2?family=Hachi+Maru+Pop&display=swap" rel="stylesheet">
-</head>
-<body>
-    <div class="auth-container">
-        <h2> ログイン</h2>
-        <?php
-        if (isset($_SESSION['message'])) {
-            echo '<p class="message">' . $_SESSION['message'] . '</p>';
-            unset($_SESSION['message']);
-        }
-        ?>
-        <form action="?page=login" method="POST">
-            <div class="form-group">
-                <label for="username">ユーザー名:</label>
-                <input type="text" id="username" name="username" required>
-            </div>
-            <div class="form-group">
-                <label for="password">パスワード:</label>
-                <input type="password" id="password" name="password" required>
-            </div>
-            <button type="submit">ログイン</button>
-        </form>
-        <p class="link-text">
-            <a href="index.php?page=home" class="btn btn-outline" style="display:inline-block; margin-top:0.5rem;">ホームへ移動</a>
-        </p>
-        <p class="link-text">アカウントをお持ちでないですか？ <a href="?page=register">新規登録はこちら</a></p>
+
+<main>
+  <div style="max-width:420px; margin:0 auto;">
+    <div class="page-hero">
+      <h1>ログイン</h1>
+      <p>アカウントにサインインしてください。</p>
     </div>
-</body>
-</html>
+
+    <?php if ($message !== ''): ?>
+      <div class="notice" style="<?= $error
+          ? 'background:#fee2e2;border-color:#fca5a5;color:#991b1b;'
+          : 'background:#dcfce7;border-color:#86efac;color:#166534;' ?>">
+        <?= htmlspecialchars($message) ?>
+      </div>
+    <?php endif; ?>
+
+    <div class="card">
+      <form action="index.php?page=login" method="POST">
+        <div class="form-group">
+          <label for="username">ユーザー名</label>
+          <input type="text" id="username" name="username"
+                 autocomplete="username" required
+                 value="<?= htmlspecialchars($_POST['username'] ?? '') ?>">
+        </div>
+        <div class="form-group">
+          <label for="password">パスワード</label>
+          <input type="password" id="password" name="password"
+                 autocomplete="current-password" required>
+        </div>
+        <button type="submit" class="btn btn-primary" style="width:100%; padding:0.75rem;">
+          ログイン
+        </button>
+      </form>
+    </div>
+
+    <p style="text-align:center; margin-top:1rem; font-size:0.9rem; color:var(--color-text-muted);">
+      アカウントをお持ちでないですか？
+      <a href="index.php?page=register" style="color:var(--color-primary);">新規登録はこちら</a>
+    </p>
+  </div>
+</main>
+
+<?php require __DIR__ . '/../includes/footer.php'; ?>
