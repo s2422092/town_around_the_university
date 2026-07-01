@@ -250,3 +250,35 @@ out center tags 30;
 
     return $data['elements'] ?? [];
 }
+
+function search_nearby_photo_url($lat, $lng, $radius = 1000) {
+    $url = 'https://commons.wikimedia.org/w/api.php?' . http_build_query([
+        'action' => 'query',
+        'format' => 'json',
+        'generator' => 'geosearch',
+        'ggscoord' => $lat . '|' . $lng,
+        'ggsradius' => $radius,
+        'ggslimit' => 5,
+        'prop' => 'imageinfo',
+        'iiprop' => 'url',
+        'iiurlwidth' => 700,
+        'origin' => '*',
+    ]);
+
+    $data = api_json_get($url, 'commons_photo_' . md5($lat . '_' . $lng . '_' . $radius), 86400);
+    $pages = $data['query']['pages'] ?? [];
+
+    foreach ($pages as $page) {
+        $image = $page['imageinfo'][0] ?? null;
+
+        if (!empty($image['thumburl'])) {
+            return $image['thumburl'];
+        }
+
+        if (!empty($image['url'])) {
+            return $image['url'];
+        }
+    }
+
+    return '';
+}

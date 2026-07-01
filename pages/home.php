@@ -66,6 +66,13 @@ if ($campus) {
         return $a['distance'] <=> $b['distance'];
     });
 
+    foreach ($station_candidates as $index => $station) {
+        if ($index >= 12) {
+            break;
+        }
+
+        $station_candidates[$index]['photo_url'] = search_nearby_photo_url($station['lat'], $station['lng'], 1200);
+    }
 }
 
 require __DIR__ . '/../includes/header.php';
@@ -165,10 +172,14 @@ require __DIR__ . '/../includes/header.php';
 
       <div class="area-card">
         <div class="area-card-img">
-          <div class="property-photo-empty">
-            <span>写真未取得</span>
-            <small>実際の物件写真は外部サイトで確認</small>
-          </div>
+          <?php if (!empty($station['photo_url'])): ?>
+            <img src="<?= htmlspecialchars($station['photo_url'], ENT_QUOTES, 'UTF-8') ?>" alt="周辺写真">
+          <?php else: ?>
+            <div class="property-photo-empty">
+              <span>写真未取得</span>
+              <small>実際の物件写真は外部サイトで確認</small>
+            </div>
+          <?php endif; ?>
         </div>
 
         <div class="area-card-body">
