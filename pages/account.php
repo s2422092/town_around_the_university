@@ -65,6 +65,44 @@ $transport_labels = [
     'walk'  => '徒歩', 'taxi' => 'タクシー',
 ];
 
+/* セッションに大学情報がなければDBから取得して補完 */
+if ($registered === null) {
+    try {
+        $db   = db_connect();
+        $pref = pg_query_params($db, '
+            SELECT up.rent_max, up.priority, up.transport, up.radius,
+                   u.id AS university_id, u.name AS university_name,
+                   c.id AS campus_id, c.name AS campus_name,
+                   c.address AS campus_address,
+                   c.lat::float AS lat, c.lng::float AS lng
+            FROM user_preferences up
+            JOIN universities u ON u.id = up.university_id
+            JOIN campuses c     ON c.id = up.campus_id
+            WHERE up.user_id = $1
+        ', [$user_id]);
+        if ($pref && pg_num_rows($pref) > 0) {
+            $p = pg_fetch_assoc($pref);
+            $registered = [
+                'university_id'   => (int)$p['university_id'],
+                'university_name' => $p['university_name'],
+                'campus_id'       => (int)$p['campus_id'],
+                'campus_name'     => $p['campus_name'],
+                'campus_address'  => $p['campus_address'],
+                'lat'             => $p['lat'],
+                'lng'             => $p['lng'],
+                'rent_max'        => $p['rent_max'] !== null ? (int)$p['rent_max'] : null,
+                'priority'        => $p['priority'] ?? 'near',
+                'transport'       => json_decode($p['transport'] ?? '[]', true) ?? [],
+                'radius'          => (int)($p['radius'] ?? 20),
+            ];
+            $_SESSION['registered'] = $registered;
+        }
+        pg_close($db);
+    } catch (RuntimeException $e) {
+        /* DB接続失敗時は未登録扱いのまま */
+    }
+}
+
 require __DIR__ . '/../includes/header.php';
 ?>
 
@@ -118,47 +156,82 @@ require __DIR__ . '/../includes/header.php';
     <h2 class="section-title">登録済みの大学・希望条件</h2>
 
     <?php if ($registered !== null): ?>
-      <div class="feature-grid" style="margin-bottom:1rem;">
-        <div class="feature-card">
-          <div class="icon"><span class="material-icons mi-lg">school</span></div>
-          <h3>大学</h3>
-          <p><?= htmlspecialchars($registered['university_name']) ?></p>
+
+      <!-- キャンパスサマリー -->
+      <div class="univ-summary">
+        <div class="univ-summary-icon">
+          <span class="material-icons" style="font-size:2.5rem; color:var(--color-primary);">account_balance</span>
         </div>
-        <div class="feature-card">
-          <div class="icon"><span class="material-icons mi-lg">account_balance</span></div>
-          <h3>キャンパス</h3>
-          <p><?= htmlspecialchars($registered['campus_name']) ?></p>
-        </div>
-        <div class="feature-card">
-          <div class="icon"><span class="material-icons mi-lg">payments</span></div>
-          <h3>家賃上限</h3>
-          <p><?= $registered['rent_max'] !== null
-              ? number_format($registered['rent_max'] / 10000, 0) . ' 万円'
-              : '上限なし' ?></p>
-        </div>
-        <div class="feature-card">
-          <div class="icon"><span class="material-icons mi-lg">star</span></div>
-          <h3>優先カテゴリ</h3>
-          <p><?= htmlspecialchars($badge_labels[$registered['priority']] ?? '近さ優先') ?></p>
-        </div>
-        <div class="feature-card">
-          <div class="icon"><span class="material-icons mi-lg">place</span></div>
-          <h3>検索範囲</h3>
-          <p><?= (int)($registered['radius'] ?? 20) ?> km 以内</p>
-        </div>
-        <div class="feature-card">
-          <div class="icon"><span class="material-icons mi-lg">train</span></div>
-          <h3>交通手段</h3>
-          <p><?php
-            $sel = array_map(fn($t) => $transport_labels[$t] ?? $t, (array)($registered['transport'] ?? []));
-            echo $sel ? htmlspecialchars(implode('・', $sel)) : '未選択';
-          ?></p>
+        <div class="univ-summary-body">
+          <div class="univ-name"><?= htmlspecialchars($registered['university_name']) ?></div>
+          <div class="univ-campus">
+            <span class="material-icons mi-xs">place</span>
+            <?= htmlspecialchars($registered['campus_name']) ?>
+            <?php if (!empty($registered['campus_address'])): ?>
+              <span class="text-muted" style="font-size:0.8rem; margin-left:0.4rem;">（<?= htmlspecialchars($registered['campus_address']) ?>）</span>
+            <?php endif; ?>
+          </div>
+          <?php if (!empty($registered['lat']) && !empty($registered['lng'])): ?>
+            <div class="univ-coords text-muted">
+              <span class="material-icons mi-xs">gps_fixed</span>
+              緯度 <?= number_format((float)$registered['lat'], 4) ?>　経度 <?= number_format((float)$registered['lng'], 4) ?>
+            </div>
+          <?php endif; ?>
         </div>
       </div>
-      <a href="index.php?page=university" class="btn btn-outline">大学情報を変更する</a>
+
+      <!-- 希望条件テーブル -->
+      <table class="pref-table">
+        <tbody>
+          <tr>
+            <th><span class="material-icons mi-xs">payments</span> 家賃上限</th>
+            <td><?= $registered['rent_max'] !== null
+                ? '<strong>' . number_format($registered['rent_max'] / 10000, 0) . ' 万円</strong> / 月'
+                : '上限なし' ?></td>
+          </tr>
+          <tr>
+            <th><span class="material-icons mi-xs">star</span> 優先カテゴリ</th>
+            <td><?php
+              $badge_class = ['cheap'=>'badge-cheap','near'=>'badge-near','livable'=>'badge-livable'];
+              $p = $registered['priority'] ?? 'near';
+              echo '<span class="badge ' . ($badge_class[$p] ?? '') . '">' . htmlspecialchars($badge_labels[$p] ?? '近さ優先') . '</span>';
+            ?></td>
+          </tr>
+          <tr>
+            <th><span class="material-icons mi-xs">place</span> 検索範囲</th>
+            <td><strong><?= (int)($registered['radius'] ?? 20) ?> km</strong> 以内</td>
+          </tr>
+          <tr>
+            <th><span class="material-icons mi-xs">directions_transit</span> 交通手段</th>
+            <td><?php
+              $sel = array_map(fn($t) => $transport_labels[$t] ?? $t, (array)($registered['transport'] ?? []));
+              if ($sel) {
+                  foreach ($sel as $t) {
+                      echo '<span class="badge badge-near" style="margin-right:0.3rem;">' . htmlspecialchars($t) . '</span>';
+                  }
+              } else {
+                  echo '<span class="text-muted">未選択</span>';
+              }
+            ?></td>
+          </tr>
+        </tbody>
+      </table>
+
+      <div style="display:flex; gap:0.75rem; flex-wrap:wrap; margin-top:1.25rem;">
+        <a href="index.php?page=university" class="btn btn-outline">
+          <span class="material-icons mi-sm">edit</span> 大学情報を変更する
+        </a>
+        <a href="index.php?page=home" class="btn btn-primary">
+          <span class="material-icons mi-sm">search</span> エリアを探す
+        </a>
+      </div>
+
     <?php else: ?>
-      <p class="text-muted mb-2">まだ大学情報が登録されていません。</p>
-      <a href="index.php?page=university" class="btn btn-primary">大学情報を入力する</a>
+      <div style="text-align:center; padding:2rem 1rem;">
+        <span class="material-icons" style="font-size:3rem; color:var(--color-border); display:block; margin-bottom:0.75rem;">school</span>
+        <p class="text-muted mb-2">まだ大学情報が登録されていません。</p>
+        <a href="index.php?page=university" class="btn btn-primary">大学情報を入力する</a>
+      </div>
     <?php endif; ?>
   </div>
 

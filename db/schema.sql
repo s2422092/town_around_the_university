@@ -211,4 +211,21 @@ CREATE TABLE IF NOT EXISTS users (
 COMMENT ON TABLE  users       IS 'ローカル認証用ユーザーテーブル（login.php / register.php が参照）';
 COMMENT ON COLUMN users.upass IS 'password_hash(PASSWORD_DEFAULT) で生成した bcrypt ハッシュ';
 
+
+-- --------------------------------------------------
+-- 12. user_preferences（ユーザーごとの大学・希望条件）
+--     university.php で保存、login.php でセッションに復元。
+-- --------------------------------------------------
+CREATE TABLE IF NOT EXISTS user_preferences (
+    user_id       INTEGER     PRIMARY KEY REFERENCES users(user_id) ON DELETE CASCADE,
+    university_id INTEGER     REFERENCES universities(id) ON DELETE SET NULL,
+    campus_id     INTEGER     REFERENCES campuses(id) ON DELETE SET NULL,
+    rent_max      INTEGER,
+    priority      VARCHAR(10) DEFAULT 'near',
+    transport     TEXT,       -- JSON 配列（例: ["train","bike"]）
+    radius        INTEGER     DEFAULT 20
+);
+
+COMMENT ON TABLE user_preferences IS 'ユーザーごとの大学・希望条件（university.phpで保存、loginで復元）';
+
 COMMIT;

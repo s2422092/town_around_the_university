@@ -28,8 +28,39 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             if ($res && pg_num_rows($res) === 1) {
                 $row = pg_fetch_assoc($res);
                 if (password_verify($upass, $row['upass'])) {
-                    $_SESSION['user_id']  = (int)$row['user_id'];
+                    $uid = (int)$row['user_id'];
+                    $_SESSION['user_id']  = $uid;
                     $_SESSION['username'] = $uname;
+
+                    /* ログイン時に保存済み大学情報をセッションに復元 */
+                    $pref = pg_query_params($db, '
+                        SELECT up.rent_max, up.priority, up.transport, up.radius,
+                               u.id AS university_id, u.name AS university_name,
+                               c.id AS campus_id, c.name AS campus_name,
+                               c.address AS campus_address,
+                               c.lat::float AS lat, c.lng::float AS lng
+                        FROM user_preferences up
+                        JOIN universities u ON u.id = up.university_id
+                        JOIN campuses c     ON c.id = up.campus_id
+                        WHERE up.user_id = $1
+                    ', [$uid]);
+                    if ($pref && pg_num_rows($pref) > 0) {
+                        $p = pg_fetch_assoc($pref);
+                        $_SESSION['registered'] = [
+                            'university_id'   => (int)$p['university_id'],
+                            'university_name' => $p['university_name'],
+                            'campus_id'       => (int)$p['campus_id'],
+                            'campus_name'     => $p['campus_name'],
+                            'campus_address'  => $p['campus_address'],
+                            'lat'             => $p['lat'],
+                            'lng'             => $p['lng'],
+                            'rent_max'        => $p['rent_max'] !== null ? (int)$p['rent_max'] : null,
+                            'priority'        => $p['priority'] ?? 'near',
+                            'transport'       => json_decode($p['transport'] ?? '[]', true) ?? [],
+                            'radius'          => (int)($p['radius'] ?? 20),
+                        ];
+                    }
+
                     pg_close($db);
                     header('Location: index.php');
                     exit;

@@ -96,6 +96,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             }
 
             /* 3. 登録内容をセッションに保存（ダッシュボード・ホームで参照） */
+            $rent_max_val = $form['rent_max'] !== '' ? (int) $form['rent_max'] : null;
             $_SESSION['registered'] = [
                 'university_id'   => $university_id,
                 'university_name' => $form['university_name'],
@@ -104,11 +105,35 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 'campus_address'  => $form['campus_address'],
                 'lat'             => $lat,
                 'lng'             => $lng,
-                'rent_max'        => $form['rent_max'] !== '' ? (int) $form['rent_max'] : null,
+                'rent_max'        => $rent_max_val,
                 'priority'        => $form['priority'],
                 'transport'       => $form['transport'],
                 'radius'          => (int) $form['radius'],
             ];
+
+            /* 4. ログイン済みなら user_preferences にも永続保存 */
+            if (!empty($_SESSION['user_id'])) {
+                pg_query_params($db, '
+                    INSERT INTO user_preferences
+                        (user_id, university_id, campus_id, rent_max, priority, transport, radius)
+                    VALUES ($1, $2, $3, $4, $5, $6, $7)
+                    ON CONFLICT (user_id) DO UPDATE SET
+                        university_id = EXCLUDED.university_id,
+                        campus_id     = EXCLUDED.campus_id,
+                        rent_max      = EXCLUDED.rent_max,
+                        priority      = EXCLUDED.priority,
+                        transport     = EXCLUDED.transport,
+                        radius        = EXCLUDED.radius
+                ', [
+                    $_SESSION['user_id'],
+                    $university_id,
+                    $campus_id,
+                    $rent_max_val,
+                    $form['priority'],
+                    json_encode($form['transport']),
+                    (int) $form['radius'],
+                ]);
+            }
 
             pg_close($db);
 

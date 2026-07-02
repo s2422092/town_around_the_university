@@ -654,6 +654,85 @@ footer {
 .mb-4 { margin-bottom: 2rem; }
 .mb-5 { margin-bottom: 3.5rem; }
 
+/* ── アカウント：大学情報サマリー ────── */
+.univ-summary {
+  display: flex;
+  align-items: flex-start;
+  gap: 1rem;
+  background: linear-gradient(135deg, #ede9fe, #e0e7ff);
+  border: 1px solid #c4b5fd;
+  border-radius: var(--radius);
+  padding: 1.25rem 1.5rem;
+  margin-bottom: 1.25rem;
+}
+
+.univ-summary-icon {
+  flex-shrink: 0;
+  width: 3.5rem;
+  height: 3.5rem;
+  background: #fff;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: var(--shadow);
+}
+
+.univ-summary-body {
+  display: flex;
+  flex-direction: column;
+  gap: 0.3rem;
+}
+
+.univ-name {
+  font-size: 1.15rem;
+  font-weight: 700;
+  color: var(--color-text);
+}
+
+.univ-campus {
+  font-size: 0.9rem;
+  color: var(--color-text-muted);
+  display: flex;
+  align-items: center;
+  gap: 0.25rem;
+  flex-wrap: wrap;
+}
+
+.univ-coords {
+  font-size: 0.78rem;
+  display: flex;
+  align-items: center;
+  gap: 0.25rem;
+}
+
+/* ── 希望条件テーブル ─────────────────── */
+.pref-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.9rem;
+}
+
+.pref-table th,
+.pref-table td {
+  padding: 0.7rem 0.9rem;
+  border-bottom: 1px solid var(--color-border);
+  vertical-align: middle;
+}
+
+.pref-table th {
+  width: 9rem;
+  color: var(--color-text-muted);
+  font-weight: 600;
+  white-space: nowrap;
+  text-align: left;
+}
+
+.pref-table tr:last-child th,
+.pref-table tr:last-child td {
+  border-bottom: none;
+}
+
 /* ── Vanta背景セクション ─────────────── */
 .vanta-section {
   position: relative;
