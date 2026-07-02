@@ -28,8 +28,9 @@ function initScrollReveal() {
     });
 }
 
-/* ── エリアカード 3D チルト ──────────────────────── */
+/* ── 3D チルト（エリアカード + 希望条件カード） ── */
 function initCardTilt() {
+    /* エリアカード（既存） */
     document.querySelectorAll('.area-card').forEach(card => {
         card.addEventListener('mouseenter', () => {
             card.style.transition = 'transform 0.08s ease, box-shadow 0.08s ease';
@@ -45,6 +46,34 @@ function initCardTilt() {
             card.style.transition = 'transform 0.5s ease, box-shadow 0.5s ease';
             card.style.transform  = '';
             card.style.boxShadow  = '';
+        });
+    });
+
+    /* 希望条件 3D カード（ハイテクシャイン付き） */
+    document.querySelectorAll('.pref-card-3d').forEach(card => {
+        const shine = card.querySelector('.pcd-shine');
+
+        card.addEventListener('mouseenter', () => {
+            card.style.transition = 'transform 0.08s ease, box-shadow 0.08s ease';
+        });
+        card.addEventListener('mousemove', e => {
+            const r  = card.getBoundingClientRect();
+            const nx = (e.clientX - r.left  - r.width  / 2) / (r.width  / 2);  // -1 ～ 1
+            const ny = (e.clientY - r.top   - r.height / 2) / (r.height / 2);  // -1 ～ 1
+            card.style.transform =
+                `perspective(800px) rotateX(${-ny * 9}deg) rotateY(${nx * 9}deg) translateY(-4px) scale(1.025)`;
+            /* マウス位置に合わせた光沢 */
+            if (shine) {
+                const px = ((nx + 1) / 2 * 100).toFixed(1);
+                const py = ((ny + 1) / 2 * 100).toFixed(1);
+                shine.style.background =
+                    `radial-gradient(circle at ${px}% ${py}%, rgba(255,255,255,0.13) 0%, transparent 65%)`;
+            }
+        });
+        card.addEventListener('mouseleave', () => {
+            card.style.transition = 'transform 0.5s ease, box-shadow 0.5s ease';
+            card.style.transform  = '';
+            if (shine) shine.style.background = '';
         });
     });
 }

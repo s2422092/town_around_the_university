@@ -73,33 +73,107 @@ require __DIR__ . '/../includes/header.php';
   <!-- 登録した希望条件 -->
   <section class="mb-5">
     <h2 class="section-title">登録した希望条件</h2>
-    <div class="feature-grid">
-      <div class="feature-card">
-        <div class="icon"><span class="material-icons mi-lg">payments</span></div>
-        <h3>家賃上限</h3>
-        <p><?= $registered['rent_max'] !== null
-            ? number_format($registered['rent_max'] / 10000, 0) . ' 万円'
-            : '上限なし' ?></p>
+    <div class="pref-grid-3d">
+
+      <!-- 家賃上限 -->
+      <div class="pref-card-3d" data-accent="violet">
+        <div class="pcd-scanline"></div>
+        <div class="pcd-shine"></div>
+        <div class="pcd-content">
+          <div class="pcd-label"><span class="material-icons mi-xs">payments</span> 家賃上限</div>
+          <div class="pcd-value">
+            <?= $registered['rent_max'] !== null
+                ? number_format($registered['rent_max'] / 10000, 0) . ' 万円'
+                : '上限なし' ?>
+          </div>
+        </div>
+        <div class="pcd-scene coin-scene">
+          <div class="pcd-coin">¥</div>
+          <div class="pcd-coin">¥</div>
+          <div class="pcd-coin">¥</div>
+        </div>
       </div>
-      <div class="feature-card">
-        <div class="icon"><span class="material-icons mi-lg">star</span></div>
-        <h3>優先カテゴリ</h3>
-        <p><?= htmlspecialchars($badge_labels[$registered['priority']]['label'] ?? '近さ') ?>優先</p>
+
+      <!-- 優先カテゴリ -->
+      <?php
+        $p      = $registered['priority'] ?? 'near';
+        $plabel = ['cheap' => '安さ優先', 'near' => '近さ優先', 'livable' => '住みやすさ優先'];
+      ?>
+      <div class="pref-card-3d" data-accent="amber">
+        <div class="pcd-scanline"></div>
+        <div class="pcd-shine"></div>
+        <div class="pcd-content">
+          <div class="pcd-label"><span class="material-icons mi-xs">star</span> 優先カテゴリ</div>
+          <div class="pcd-value"><?= htmlspecialchars($plabel[$p] ?? '近さ優先') ?></div>
+        </div>
+        <div class="pcd-scene star-scene">
+          <div class="pcd-star">★</div>
+          <div class="pcd-star">★</div>
+          <div class="pcd-star">★</div>
+          <div class="pcd-star">★</div>
+          <div class="pcd-star">★</div>
+        </div>
       </div>
-      <div class="feature-card">
-        <div class="icon"><span class="material-icons mi-lg">place</span></div>
-        <h3>検索範囲</h3>
-        <p><?= (int) ($registered['radius'] ?? 20) ?> km 以内</p>
+
+      <!-- 検索範囲 -->
+      <div class="pref-card-3d" data-accent="green">
+        <div class="pcd-scanline"></div>
+        <div class="pcd-shine"></div>
+        <div class="pcd-content">
+          <div class="pcd-label"><span class="material-icons mi-xs">explore</span> 検索範囲</div>
+          <div class="pcd-value"><?= (int)($registered['radius'] ?? 20) ?> km 以内</div>
+        </div>
+        <div class="pcd-scene radar-scene">
+          <div class="pcd-radar-center"></div>
+          <div class="pcd-radar-ring"></div>
+          <div class="pcd-radar-ring"></div>
+          <div class="pcd-radar-ring"></div>
+        </div>
       </div>
-      <div class="feature-card">
-        <div class="icon"><span class="material-icons mi-lg">train</span></div>
-        <h3>交通手段</h3>
-        <p><?php
-          $tlabels = ['train' => '電車', 'bus' => 'バス', 'bike' => '自転車', 'walk' => '徒歩', 'taxi' => 'タクシー'];
-          $selected = array_map(fn($t) => $tlabels[$t] ?? $t, (array) ($registered['transport'] ?? []));
-          echo $selected ? htmlspecialchars(implode('・', $selected)) : '未選択';
-        ?></p>
+
+      <!-- 交通手段 -->
+      <?php
+        $tlabels   = ['train' => '電車', 'bus' => 'バス', 'bike' => '自転車', 'walk' => '徒歩', 'taxi' => 'タクシー'];
+        $sel_trans = (array)($registered['transport'] ?? []);
+        $trans_txt = $sel_trans
+            ? implode('・', array_map(fn($t) => $tlabels[$t] ?? $t, $sel_trans))
+            : '未選択';
+      ?>
+      <div class="pref-card-3d" data-accent="cyan">
+        <div class="pcd-scanline"></div>
+        <div class="pcd-shine"></div>
+        <div class="pcd-content">
+          <div class="pcd-label"><span class="material-icons mi-xs">directions_transit</span> 交通手段</div>
+          <div class="pcd-value"><?= htmlspecialchars($trans_txt) ?></div>
+        </div>
+        <?php if (in_array('train', $sel_trans) || empty($sel_trans)): ?>
+        <div class="pcd-scene">
+          <div class="pcd-rails">
+            <div class="pcd-rail"></div>
+            <div class="pcd-sleepers"></div>
+            <div class="pcd-rail"></div>
+          </div>
+          <div class="pcd-train-icon"><span class="material-icons">train</span></div>
+        </div>
+        <?php elseif (in_array('bike', $sel_trans)): ?>
+        <div class="pcd-scene">
+          <div class="pcd-rails">
+            <div class="pcd-rail"></div>
+            <div class="pcd-sleepers"></div>
+            <div class="pcd-rail"></div>
+          </div>
+          <div class="pcd-bike-icon"><span class="material-icons">directions_bike</span></div>
+        </div>
+        <?php else: ?>
+        <div class="pcd-scene radar-scene">
+          <div class="pcd-radar-center" style="background:#22d3ee;box-shadow:0 0 16px #22d3ee;"></div>
+          <div class="pcd-radar-ring" style="border-color:rgba(34,211,238,0.75);"></div>
+          <div class="pcd-radar-ring" style="border-color:rgba(34,211,238,0.75);"></div>
+          <div class="pcd-radar-ring" style="border-color:rgba(34,211,238,0.75);"></div>
+        </div>
+        <?php endif; ?>
       </div>
+
     </div>
   </section>
 
