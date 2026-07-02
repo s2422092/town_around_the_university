@@ -5,6 +5,8 @@ session_start();
 $page_title   = 'ホーム — エリア候補一覧 | 大学周辺の家';
 $current_page = 'home';
 $page_js      = 'home.js';
+$extra_head   = '<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">'
+              . '<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>';
 
 $registered = $_SESSION['registered'] ?? null;
 
@@ -27,13 +29,15 @@ if ($use_db) {
     require __DIR__ . '/../includes/routing.php';
     try {
         $db = db_connect();
+        $rent_max_val = ($filter['rent_max'] !== '') ? (int)$filter['rent_max'] : null;
         $rows = ranked_areas(
             $db,
             (float) $registered['lat'],
             (float) $registered['lng'],
             (int) $filter['radius'],
             in_array($filter['priority'], ['near', 'cheap', 'livable'], true) ? $filter['priority'] : 'near',
-            12
+            12,
+            $rent_max_val
         );
         pg_close($db);
 
@@ -66,6 +70,8 @@ if ($use_db) {
             $areas[] = [
                 'id'           => $r['id'],
                 'name'         => $r['name'],
+                'lat'          => (float) $r['lat'],
+                'lng'          => (float) $r['lng'],
                 'distance'     => $r['distance_km'],
                 'rent'         => format_rent($r['price_per_tatami']),
                 'poi'          => (int) $r['poi_count'],
@@ -106,7 +112,7 @@ require __DIR__ . '/../includes/header.php';
 
   <?php if (!$use_db): ?>
     <div class="notice">
-      ℹ️ 現在はダミーデータを表示しています。大学情報を登録すると実際のエリアが表示されます。
+      <span class="material-icons mi-sm">info</span> 現在はダミーデータを表示しています。大学情報を登録すると実際のエリアが表示されます。
       <a href="index.php?page=university">→ 大学情報を入力</a>
     </div>
   <?php elseif ($db_error): ?>
@@ -115,15 +121,51 @@ require __DIR__ . '/../includes/header.php';
     </div>
   <?php else: ?>
     <div class="notice" style="background:#dcfce7;border-color:#86efac;color:#166534;">
-      📍 <?= htmlspecialchars($registered['university_name']) ?>
+      <span class="material-icons mi-sm">place</span> <?= htmlspecialchars($registered['university_name']) ?>
       <?= htmlspecialchars($registered['campus_name']) ?> 周辺のエリアを表示しています。
     </div>
   <?php endif; ?>
 
   <?php if ($transport_deferred): ?>
     <div class="notice">
-      ℹ️ 電車・バスの所要時間は今後対応予定です。現在は徒歩・自転車・タクシーのみ通学時間を算出します。
+      <span class="material-icons mi-sm">info</span> 電車・バスの所要時間は今後対応予定です。現在は徒歩・自転車・タクシーのみ通学時間を算出します。
     </div>
+  <?php endif; ?>
+
+  <!-- エリアマップ -->
+  <?php if ($use_db && !$db_error && $registered !== null): ?>
+  <script>
+  window.HOME_DATA = <?= json_encode([
+      'campus' => [
+          'lat'    => (float) $registered['lat'],
+          'lng'    => (float) $registered['lng'],
+          'name'   => $registered['university_name'],
+          'campus' => $registered['campus_name'],
+      ],
+      'areas' => $areas,
+  ], JSON_UNESCAPED_UNICODE) ?>;
+  </script>
+  <div class="home-map-wrap">
+    <div class="home-map-header">
+      <span class="material-icons mi-sm">map</span>
+      エリアマップ
+      <span class="home-map-sub">エリアをクリックで詳細を見る　/　カーソルで情報を表示</span>
+    </div>
+    <div class="home-map-legend">
+      <span class="legend-item">
+        <span class="material-icons" style="color:#dc2626;font-size:1rem;line-height:1;">location_on</span> 大学キャンパス
+      </span>
+      <span class="legend-item"><span class="legend-dot" style="background:#4f46e5;"></span> 近さ優先エリア</span>
+      <span class="legend-item"><span class="legend-dot" style="background:#16a34a;"></span> 安さ優先エリア</span>
+      <span class="legend-item"><span class="legend-dot" style="background:#06b6d4;"></span> 住みやすさエリア</span>
+    </div>
+    <div id="home-map" class="home-map"></div>
+  </div>
+  <?php else: ?>
+  <div class="placeholder-map">
+    <span class="material-icons" style="font-size:2.2rem;display:block;margin-bottom:0.5rem;opacity:0.7;">map</span>
+    大学情報を登録するとキャンパス周辺のエリアマップが表示されます
+  </div>
   <?php endif; ?>
 
   <!-- フィルタバー（GETメソッドで page パラメータを維持するため hidden を使用） -->
@@ -178,18 +220,27 @@ require __DIR__ . '/../includes/header.php';
     </div>
   <?php else: ?>
   <div class="card-grid">
-    <?php foreach ($display_areas as $area): ?>
-    <div class="area-card">
-      <div class="area-card-img">🏘️</div>
+    <?php
+    $card_bg    = ['near' => 'linear-gradient(135deg,#e0e7ff,#c7d2fe)', 'cheap' => 'linear-gradient(135deg,#dcfce7,#bbf7d0)', 'livable' => 'linear-gradient(135deg,#cffafe,#a5f3fc)'];
+    $card_color = ['near' => '#4338ca', 'cheap' => '#15803d', 'livable' => '#0e7490'];
+    foreach ($display_areas as $area):
+        $mb = $area['badges'][0] ?? 'near';
+        $bg = $card_bg[$mb]    ?? $card_bg['near'];
+        $ic = $card_color[$mb] ?? $card_color['near'];
+    ?>
+    <div class="area-card" data-id="<?= (int)$area['id'] ?>">
+      <div class="area-card-img" style="background:<?= $bg ?>;">
+        <span class="material-icons" style="font-size:3rem;color:<?= $ic ?>;">location_city</span>
+      </div>
       <div class="area-card-body">
         <div class="area-card-title"><?= htmlspecialchars($area['name']) ?></div>
         <div class="area-card-meta">
-          <span>📍 直線距離 <?= htmlspecialchars($area['distance']) ?> km</span>
+          <span class="icon-text"><span class="material-icons mi-xs">place</span> 直線距離 <?= htmlspecialchars($area['distance']) ?> km</span>
           <?php if (!empty($area['commute_min'])): ?>
-            <span><?= htmlspecialchars(mode_label($area['commute_mode'])) ?> 通学時間 約<?= (int) $area['commute_min'] ?>分</span>
+            <span class="icon-text"><?= mode_label($area['commute_mode']) ?> 通学時間 約<?= (int) $area['commute_min'] ?>分</span>
           <?php endif; ?>
-          <span>💴 家賃相場 <?= htmlspecialchars($area['rent']) ?></span>
-          <span>🏪 周辺施設 <?= (int) $area['poi'] ?> 件</span>
+          <span class="icon-text"><span class="material-icons mi-xs">payments</span> 家賃相場 <?= htmlspecialchars($area['rent']) ?></span>
+          <span class="icon-text"><span class="material-icons mi-xs">store</span> 周辺施設 <?= (int) $area['poi'] ?> 件</span>
         </div>
         <div class="badge-row">
           <?php foreach ($area['badges'] as $b): ?>
@@ -202,6 +253,7 @@ require __DIR__ . '/../includes/header.php';
       </div>
     </div>
     <?php endforeach; ?>
+    <?php unset($mb, $bg, $ic); ?>
   </div>
   <?php endif; ?>
 
