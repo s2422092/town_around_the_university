@@ -10,7 +10,6 @@ if ($_logged_in) {
     $pages = [
         'dashboard'  => ['url' => 'index.php',                 'label' => 'ダッシュボード'],
         'home'       => ['url' => 'index.php?page=home',       'label' => 'ホーム'],
-        'university' => ['url' => 'index.php?page=university', 'label' => '大学情報'],
         'account'    => ['url' => 'index.php?page=account',    'label' => 'アカウント'],
     ];
 } else {
