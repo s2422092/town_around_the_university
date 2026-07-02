@@ -75,7 +75,7 @@ function nominatim_geocode(string $query): ?array
              'accept-language'=> 'ja',
          ]);
 
-    $json = http_get($url, 'town_around_the_university/1.0 (educational; contact: admin@example.com)');
+    $json = http_get($url, 'TownAroundUniversity/1.0 (university-housing-search; non-commercial)');
     if ($json === null) return null;
 
     $data = json_decode($json, true);
