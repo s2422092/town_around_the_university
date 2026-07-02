@@ -15,10 +15,11 @@ require __DIR__ . '/../includes/pois.php';
 $area_id    = isset($_GET['id']) && ctype_digit($_GET['id']) ? (int)$_GET['id'] : 0;
 $registered = $_SESSION['registered'] ?? null;
 
-$area     = null;
-$pois     = [];
-$scores   = [];
-$commutes = [];
+$area        = null;
+$pois        = [];
+$poi_summary = [];
+$scores      = [];
+$commutes    = [];
 $db_error = false;
 
 if ($area_id > 0) {
@@ -41,7 +42,8 @@ if ($area_id > 0) {
 
         if ($area) {
             // 周辺施設（DBになければ Overpass API から取得してキャッシュ）
-            $pois = fetch_area_pois($db, $area_id, (float)$area['lat'], (float)$area['lng']);
+            $pois        = fetch_area_pois($db, $area_id, (float)$area['lat'], (float)$area['lng']);
+            $poi_summary = fetch_area_poi_summary($db, $area_id);
 
             $campus_id  = $registered['campus_id'] ?? null;
             $campus_lat = isset($registered['lat'])  ? (float)$registered['lat']  : null;
@@ -64,7 +66,8 @@ if ($area_id > 0) {
                 $distance = ($campus_lat !== null && $campus_lng !== null)
                     ? haversine_km($campus_lat, $campus_lng, (float)$area['lat'], (float)$area['lng'])
                     : null;
-                $scores = compute_scores($distance, $area['price_per_tatami'], count($pois));
+                $total_poi_count = array_sum(array_column(array_values($poi_summary), 'total'));
+                $scores = compute_scores($distance, $area['price_per_tatami'], $total_poi_count);
                 if ($distance !== null) {
                     $scores['distance_km'] = round($distance, 1);
                 }
@@ -267,20 +270,32 @@ require __DIR__ . '/../includes/header.php';
   <!-- 周辺施設 -->
   <div class="card mb-2">
     <h2 class="section-title">周辺施設（OpenStreetMap データ）</h2>
-    <?php if (empty($pois)): ?>
+    <?php if (empty($poi_summary)): ?>
       <p class="text-muted">周辺施設データを取得できませんでした。時間をおいて再度お試しください。</p>
     <?php else: ?>
-      <ul class="poi-list">
-        <?php foreach ($pois as $poi):
-          $meta = poi_meta($poi['type']); ?>
-        <li>
-          <span class="poi-icon material-icons mi-sm"><?= $meta['icon'] ?></span>
-          <span style="flex:1;"><?= htmlspecialchars($poi['name']) ?></span>
-          <span class="text-muted"><?= htmlspecialchars($meta['label']) ?></span>
-        </li>
+      <div class="poi-summary">
+        <?php foreach ($poi_summary as $type => $cat): ?>
+        <div class="poi-cat" data-poi-type="<?= htmlspecialchars($type) ?>">
+          <div class="poi-cat-header">
+            <span class="poi-cat-icon material-icons"><?= htmlspecialchars($cat['icon']) ?></span>
+            <span class="poi-cat-label"><?= htmlspecialchars($cat['label']) ?></span>
+            <span class="poi-cat-total"><?= number_format($cat['total']) ?> 件</span>
+          </div>
+          <div class="poi-name-chips">
+            <?php foreach ($cat['names'] as $n): ?>
+            <span class="poi-chip">
+              <span class="poi-chip-name"><?= htmlspecialchars($n['name']) ?></span>
+              <span class="poi-chip-count"><?= number_format($n['count']) ?></span>
+            </span>
+            <?php endforeach; ?>
+            <?php if ($cat['extra'] > 0): ?>
+            <span class="poi-chip poi-chip-more">他 <?= $cat['extra'] ?> 種</span>
+            <?php endif; ?>
+          </div>
+        </div>
         <?php endforeach; ?>
-      </ul>
-      <p class="text-muted mt-2" style="font-size:0.78rem;">※ OpenStreetMap Overpass API から取得（エリア中心から半径 1.5 km）</p>
+      </div>
+      <p class="text-muted mt-2" style="font-size:0.78rem;">※ OpenStreetMap Overpass API から取得（エリア中心から半径 3 km）</p>
     <?php endif; ?>
   </div>
 
