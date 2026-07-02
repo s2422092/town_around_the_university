@@ -16,6 +16,7 @@ require __DIR__ . '/../db/connection.php';
 
 // ── オプション解析 ───────────────────────────────────────────────────
 $dry_run      = in_array('--dry-run', $argv);
+$missing_only = in_array('--missing-only', $argv);
 $area_id_only = null;
 $radius       = 3000;
 foreach ($argv as $arg) {
@@ -26,9 +27,13 @@ foreach ($argv as $arg) {
 // ── DB ───────────────────────────────────────────────────────────────
 $db = db_connect();
 
-$cond = $area_id_only
-    ? "WHERE id = {$area_id_only} AND lat IS NOT NULL AND lng IS NOT NULL"
-    : "WHERE lat IS NOT NULL AND lng IS NOT NULL";
+if ($area_id_only) {
+    $cond = "WHERE id = {$area_id_only} AND lat IS NOT NULL AND lng IS NOT NULL";
+} elseif ($missing_only) {
+    $cond = "WHERE lat IS NOT NULL AND lng IS NOT NULL AND id NOT IN (SELECT DISTINCT area_id FROM pois)";
+} else {
+    $cond = "WHERE lat IS NOT NULL AND lng IS NOT NULL";
+}
 $res = pg_query($db, "SELECT id, name, lat::float AS lat, lng::float AS lng FROM areas $cond ORDER BY id");
 
 $areas = [];
@@ -37,7 +42,8 @@ while ($row = pg_fetch_assoc($res)) $areas[] = $row;
 $n = count($areas);
 echo "=== POI 自動取得スクリプト ===\n";
 echo "対象エリア: {$n} 件 / 検索半径: {$radius}m\n";
-if ($dry_run) echo "[DRY RUN — DB への書き込みは行いません]\n";
+if ($dry_run)      echo "[DRY RUN — DB への書き込みは行いません]\n";
+if ($missing_only) echo "[MISSING ONLY — POI未取得エリアのみ対象]\n";
 echo str_repeat('─', 52) . "\n";
 
 // ── Overpass QL クエリ生成 ───────────────────────────────────────────
