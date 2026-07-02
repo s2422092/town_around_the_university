@@ -4,6 +4,7 @@ session_start();
 
 $page_title   = 'ダッシュボード | 大学周辺の家';
 $current_page = 'dashboard';
+$page_js      = 'dashboard.js';
 
 /* 登録済みの大学情報（university.php で保存） */
 $registered = $_SESSION['registered'] ?? null;
@@ -44,6 +45,7 @@ require __DIR__ . '/../includes/header.php';
 
   <!-- ===== 登録済み：パーソナライズ表示 ===== -->
 
+
   <?php if (isset($_GET['registered'])): ?>
     <div class="notice" style="background:#dcfce7;border-color:#86efac;color:#166534;">
       <span class="material-icons mi-sm" style="color:#166534;">check_circle</span>
@@ -56,7 +58,7 @@ require __DIR__ . '/../includes/header.php';
   <?php endif; ?>
 
   <!-- 登録キャンパスの概要 -->
-  <section class="hero-section">
+  <section class="hero-section" id="hero-bg">
     <h1><?= htmlspecialchars($registered['university_name']) ?> 周辺のエリアを探す</h1>
     <p>
       <span class="material-icons mi-sm">place</span> <?= htmlspecialchars($registered['campus_name']) ?>
@@ -69,7 +71,7 @@ require __DIR__ . '/../includes/header.php';
   </section>
 
   <!-- 登録した希望条件 -->
-  <section class="mb-2">
+  <section class="mb-5">
     <h2 class="section-title">登録した希望条件</h2>
     <div class="feature-grid">
       <div class="feature-card">
@@ -102,7 +104,7 @@ require __DIR__ . '/../includes/header.php';
   </section>
 
   <!-- おすすめエリア（上位3件） -->
-  <section class="mb-2">
+  <section class="mb-5">
     <h2 class="section-title">あなたへのおすすめエリア</h2>
 
     <?php if ($db_error): ?>
@@ -145,7 +147,7 @@ require __DIR__ . '/../includes/header.php';
   <!-- ===== 未登録：サービス紹介 ===== -->
 
   <!-- ヒーローバナー -->
-  <section class="hero-section">
+  <section class="hero-section" id="hero-bg">
     <h1>大学周辺で、理想の街を見つけよう</h1>
     <p>通学時間・家賃・住みやすさで、あなたにぴったりのエリアを比較・発見できます。</p>
     <div class="hero-actions">
@@ -155,7 +157,7 @@ require __DIR__ . '/../includes/header.php';
   </section>
 
   <!-- 主要機能紹介 -->
-  <section class="mb-2">
+  <section class="mb-5">
     <h2 class="section-title">このサービスでできること</h2>
     <div class="feature-grid">
       <div class="feature-card">
@@ -214,10 +216,10 @@ require __DIR__ . '/../includes/header.php';
   </section>
 
   <!-- CTAカード -->
-  <div class="card" style="text-align:center; padding: 2rem;">
-    <h2 style="margin-bottom:0.5rem;">まずは大学情報を入力しましょう</h2>
-    <p class="text-muted mb-2">キャンパスの場所を登録すると、エリア比較が使えるようになります。</p>
-    <a class="btn btn-primary" href="index.php?page=university">大学情報を入力する →</a>
+  <div class="card" style="text-align:center; padding: 3.5rem 2rem;">
+    <h2 style="margin-bottom:0.75rem; font-size:1.4rem;">まずは大学情報を入力しましょう</h2>
+    <p class="text-muted mb-4">キャンパスの場所を登録すると、エリア比較が使えるようになります。</p>
+    <a class="btn btn-primary" href="index.php?page=university" style="font-size:1rem; padding:0.75rem 2rem;">大学情報を入力する →</a>
   </div>
 
 <?php endif; ?>
