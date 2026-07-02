@@ -55,32 +55,65 @@ function gsi_geocode(string $address): ?array
 }
 
 /**
+ * Nominatim（OpenStreetMap）で施設名・大学名などを検索して緯度経度を返す。
+ * 大学キャンパスの正確な座標取得に適している。
+ *
+ * @param  string $query 検索クエリ（例: '東京大学 本郷キャンパス'）
+ * @return array{0: float, 1: float}|null [緯度, 経度]。取得失敗時は null
+ */
+function nominatim_geocode(string $query): ?array
+{
+    $query = trim($query);
+    if ($query === '') return null;
+
+    $url = 'https://nominatim.openstreetmap.org/search?'
+         . http_build_query([
+             'q'              => $query,
+             'format'         => 'json',
+             'limit'          => 1,
+             'countrycodes'   => 'jp',
+             'accept-language'=> 'ja',
+         ]);
+
+    $json = http_get($url, 'town_around_the_university/1.0 (educational; contact: admin@example.com)');
+    if ($json === null) return null;
+
+    $data = json_decode($json, true);
+    if (!is_array($data) || empty($data)) return null;
+
+    $lat = (float)($data[0]['lat'] ?? 0);
+    $lng = (float)($data[0]['lon'] ?? 0);
+
+    if ($lat < 20 || $lat > 46 || $lng < 122 || $lng > 154) return null;
+
+    return [$lat, $lng];
+}
+
+/**
  * URL を GET して本文を返す。curl が使えればそれを、無ければ
  * file_get_contents をフォールバックとして使う。
  *
  * @return string|null 本文。失敗時は null
  */
-function http_get(string $url): ?string
+function http_get(string $url, string $ua = 'town-around-the-university/1.0'): ?string
 {
     if (function_exists('curl_init')) {
         $ch = curl_init($url);
         curl_setopt_array($ch, [
             CURLOPT_RETURNTRANSFER => true,
             CURLOPT_TIMEOUT        => 10,
-            CURLOPT_USERAGENT      => 'town-around-the-university/1.0',
+            CURLOPT_USERAGENT      => $ua,
         ]);
         $body = curl_exec($ch);
         $code = curl_getinfo($ch, CURLINFO_HTTP_CODE);
-        // PHP 8.0+ では curl_close() は不要（ハンドルはGCで解放される）
         if ($body !== false && $code >= 200 && $code < 300) {
             return (string) $body;
         }
         return null;
     }
 
-    // curl が無い環境向けフォールバック
     $context = stream_context_create([
-        'http' => ['timeout' => 10, 'header' => "User-Agent: town-around-the-university/1.0\r\n"],
+        'http' => ['timeout' => 10, 'header' => "User-Agent: {$ua}\r\n"],
     ]);
     $body = @file_get_contents($url, false, $context);
     return $body === false ? null : $body;

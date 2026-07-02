@@ -54,11 +54,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         try {
             $db = db_connect();
 
-            /* 住所→緯度経度（国土地理院API）。失敗しても登録は続行する */
-            $coords = gsi_geocode($form['campus_address']);
-            $lat    = $coords[0] ?? null;
-            $lng    = $coords[1] ?? null;
-
             /* 1. 大学を取得 or 新規登録 */
             $res = pg_query_params($db, 'SELECT id FROM universities WHERE name = $1', [$form['university_name']]);
             if ($res && pg_num_rows($res) > 0) {
@@ -72,20 +67,36 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 $university_id = (int) pg_fetch_result($res, 0, 'id');
             }
 
-            /* 2. キャンパスを取得 or 新規登録（同名キャンパスは住所・座標を更新） */
+            /* 2. キャンパスを取得 or 新規登録 */
             $res = pg_query_params(
                 $db,
-                'SELECT id FROM campuses WHERE university_id = $1 AND name = $2',
+                'SELECT id, lat::float AS lat, lng::float AS lng FROM campuses WHERE university_id = $1 AND name = $2',
                 [$university_id, $form['campus_name']]
             );
             if ($res && pg_num_rows($res) > 0) {
-                $campus_id = (int) pg_fetch_result($res, 0, 'id');
-                pg_query_params(
-                    $db,
-                    'UPDATE campuses SET address = $1, lat = $2, lng = $3 WHERE id = $4',
-                    [$form['campus_address'], $lat, $lng, $campus_id]
-                );
+                /* 既存キャンパス → DB の正確な座標を優先（上書きしない） */
+                $row       = pg_fetch_assoc($res);
+                $campus_id = (int) $row['id'];
+                $lat       = ($row['lat'] !== null && $row['lat'] != 0.0) ? (float) $row['lat'] : null;
+                $lng       = ($row['lng'] !== null && $row['lng'] != 0.0) ? (float) $row['lng'] : null;
+                /* 座標が未設定の場合のみ再取得 */
+                if ($lat === null || $lng === null) {
+                    $coords = nominatim_geocode($form['university_name'] . ' ' . $form['campus_name'])
+                           ?? gsi_geocode($form['campus_address']);
+                    $lat = $coords[0] ?? null;
+                    $lng = $coords[1] ?? null;
+                    if ($lat !== null) {
+                        pg_query_params($db, 'UPDATE campuses SET lat=$1, lng=$2 WHERE id=$3', [$lat, $lng, $campus_id]);
+                    }
+                }
+                /* 住所だけ更新 */
+                pg_query_params($db, 'UPDATE campuses SET address=$1 WHERE id=$2', [$form['campus_address'], $campus_id]);
             } else {
+                /* 新規キャンパス → Nominatim（大学名検索）→ GSI（住所）の順で取得 */
+                $coords = nominatim_geocode($form['university_name'] . ' ' . $form['campus_name'])
+                       ?? gsi_geocode($form['campus_address']);
+                $lat = $coords[0] ?? null;
+                $lng = $coords[1] ?? null;
                 $res = pg_query_params(
                     $db,
                     'INSERT INTO campuses (university_id, name, address, lat, lng)
