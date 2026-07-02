@@ -654,6 +654,130 @@ footer {
 .mb-4 { margin-bottom: 2rem; }
 .mb-5 { margin-bottom: 3.5rem; }
 
+/* ── Vanta背景セクション ─────────────── */
+.vanta-section {
+  position: relative;
+  overflow: hidden;
+  border-radius: var(--radius);
+  padding: 5rem 2rem 4.5rem;
+  background: linear-gradient(135deg, #0f172a 0%, #1e1b4b 100%);
+}
+
+.vanta-section > * {
+  position: relative;
+  z-index: 1;
+}
+
+.vanta-section-title {
+  color: #fff;
+  text-align: center;
+  font-size: 1.4rem;
+  font-weight: 700;
+  letter-spacing: 0.01em;
+  margin-bottom: 2.5rem;
+}
+
+.vanta-divider {
+  border: none;
+  height: 1px;
+  background: rgba(255, 255, 255, 0.15);
+  margin: 3.5rem 0;
+}
+
+/* ── グラスモーフィズムカード ─────────── */
+.glass-grid {
+  margin-bottom: 0 !important;
+}
+
+.glass-card {
+  background: rgba(255, 255, 255, 0.07);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  border-radius: var(--radius);
+  padding: 1.75rem 1.5rem;
+  color: #fff;
+  text-align: center;
+  transition: background 0.25s, transform 0.22s, box-shadow 0.22s;
+}
+
+.glass-card:hover {
+  background: rgba(255, 255, 255, 0.13);
+  transform: translateY(-5px);
+  box-shadow: 0 12px 40px rgba(0, 0, 0, 0.35);
+}
+
+.glass-card .icon {
+  margin-bottom: 0.75rem;
+  color: var(--color-accent);
+}
+
+.glass-card h3 {
+  font-size: 0.95rem;
+  font-weight: 700;
+  margin-bottom: 0.4rem;
+  color: #fff;
+}
+
+.glass-card p {
+  font-size: 0.8rem;
+  color: rgba(255, 255, 255, 0.7);
+  line-height: 1.65;
+}
+
+/* ── グラスステップ ────────────────────── */
+.glass-step {
+  flex: 1;
+  min-width: 160px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  padding: 2.25rem 1.5rem;
+  position: relative;
+  background: rgba(255, 255, 255, 0.07);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  border-radius: var(--radius);
+  color: #fff;
+  transition: background 0.25s, transform 0.22s;
+}
+
+.glass-step:hover {
+  background: rgba(255, 255, 255, 0.13);
+  transform: translateY(-5px);
+}
+
+.glass-step strong {
+  display: block;
+  color: #fff;
+  font-size: 1rem;
+  margin-bottom: 0.3rem;
+}
+
+.glass-step p {
+  color: rgba(255, 255, 255, 0.72);
+  font-size: 0.82rem;
+  margin-top: 0.25rem;
+}
+
+.glass-step:not(:last-child)::after {
+  content: '→';
+  position: absolute;
+  right: -1.1rem;
+  top: 50%;
+  transform: translateY(-50%);
+  font-size: 1rem;
+  color: rgba(255, 255, 255, 0.4);
+  z-index: 1;
+}
+
+/* glass-stepの中のstep-numはグラデーション維持 */
+.glass-step .step-num {
+  margin-bottom: 0.75rem;
+}
+
 /* ── スクロールリビール ───────────────── */
 .will-reveal {
   opacity: 0;
