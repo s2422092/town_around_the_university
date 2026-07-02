@@ -151,8 +151,34 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     }
 }
 
+/* キャンパスデータをJSに渡す（オートコンプリート用） */
+$campus_data = [];
+try {
+    $db_c = db_connect();
+    $res_c = pg_query($db_c,
+        'SELECT u.name AS uname, c.name AS cname, c.address
+         FROM campuses c
+         JOIN universities u ON u.id = c.university_id
+         ORDER BY u.name, c.name'
+    );
+    while ($row = pg_fetch_assoc($res_c)) {
+        $campus_data[$row['uname']][] = [
+            'campus'  => $row['cname'],
+            'address' => $row['address'] ?? '',
+        ];
+    }
+    pg_close($db_c);
+} catch (RuntimeException $e) {
+    /* DB接続失敗時はオートコンプリートなし */
+}
+
+$page_js = 'university.js';
+
 require __DIR__ . '/../includes/header.php';
 ?>
+<script>window.CAMPUS_DATA = <?= json_encode($campus_data, JSON_UNESCAPED_UNICODE) ?>;</script>
+<datalist id="university-list"></datalist>
+<datalist id="campus-list"></datalist>
 
 <main>
 
@@ -179,22 +205,30 @@ require __DIR__ . '/../includes/header.php';
         <div class="form-group">
           <label for="university_name">大学名</label>
           <input type="text" id="university_name" name="university_name"
+                 list="university-list"
                  value="<?= htmlspecialchars($form['university_name']) ?>"
-                 placeholder="例：〇〇大学" required>
+                 placeholder="例：東京大学" autocomplete="off" required>
         </div>
 
         <div class="form-group">
           <label for="campus_name">キャンパス名</label>
           <input type="text" id="campus_name" name="campus_name"
+                 list="campus-list"
                  value="<?= htmlspecialchars($form['campus_name']) ?>"
-                 placeholder="例：本キャンパス・△△キャンパス" required>
+                 placeholder="例：本郷キャンパス" autocomplete="off" required>
+          <span class="form-hint">大学名を入力するとキャンパス候補が表示されます。</span>
         </div>
 
         <div class="form-group">
           <label for="campus_address">キャンパス住所</label>
           <input type="text" id="campus_address" name="campus_address"
                  value="<?= htmlspecialchars($form['campus_address']) ?>"
-                 placeholder="例：東京都〇〇区△△1-2-3" required>
+                 placeholder="例：東京都文京区本郷7-3-1" required>
+          <span id="autofill-hint" class="form-hint"
+                style="display:none; opacity:0; transition:opacity 0.3s; color:var(--color-primary);">
+            <span class="material-icons mi-xs">auto_fix_high</span>
+            キャンパス住所を自動入力しました。必要に応じて修正できます。
+          </span>
           <span class="form-hint">入力後、緯度経度を国土地理院APIで自動取得します。</span>
         </div>
       </div>
