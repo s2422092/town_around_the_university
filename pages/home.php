@@ -5,6 +5,8 @@ session_start();
 $page_title   = 'ホーム — エリア候補一覧 | 大学周辺の家';
 $current_page = 'home';
 $page_js      = 'home.js';
+$extra_head   = '<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">'
+              . '<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>';
 
 $registered = $_SESSION['registered'] ?? null;
 
@@ -68,6 +70,8 @@ if ($use_db) {
             $areas[] = [
                 'id'           => $r['id'],
                 'name'         => $r['name'],
+                'lat'          => (float) $r['lat'],
+                'lng'          => (float) $r['lng'],
                 'distance'     => $r['distance_km'],
                 'rent'         => format_rent($r['price_per_tatami']),
                 'poi'          => (int) $r['poi_count'],
@@ -128,6 +132,42 @@ require __DIR__ . '/../includes/header.php';
     </div>
   <?php endif; ?>
 
+  <!-- エリアマップ -->
+  <?php if ($use_db && !$db_error && $registered !== null): ?>
+  <script>
+  window.HOME_DATA = <?= json_encode([
+      'campus' => [
+          'lat'    => (float) $registered['lat'],
+          'lng'    => (float) $registered['lng'],
+          'name'   => $registered['university_name'],
+          'campus' => $registered['campus_name'],
+      ],
+      'areas' => $areas,
+  ], JSON_UNESCAPED_UNICODE) ?>;
+  </script>
+  <div class="home-map-wrap">
+    <div class="home-map-header">
+      <span class="material-icons mi-sm">map</span>
+      エリアマップ
+      <span class="home-map-sub">エリアをクリックで詳細を見る　/　カーソルで情報を表示</span>
+    </div>
+    <div class="home-map-legend">
+      <span class="legend-item">
+        <span class="material-icons" style="color:#dc2626;font-size:1rem;line-height:1;">location_on</span> 大学キャンパス
+      </span>
+      <span class="legend-item"><span class="legend-dot" style="background:#4f46e5;"></span> 近さ優先エリア</span>
+      <span class="legend-item"><span class="legend-dot" style="background:#16a34a;"></span> 安さ優先エリア</span>
+      <span class="legend-item"><span class="legend-dot" style="background:#06b6d4;"></span> 住みやすさエリア</span>
+    </div>
+    <div id="home-map" class="home-map"></div>
+  </div>
+  <?php else: ?>
+  <div class="placeholder-map">
+    <span class="material-icons" style="font-size:2.2rem;display:block;margin-bottom:0.5rem;opacity:0.7;">map</span>
+    大学情報を登録するとキャンパス周辺のエリアマップが表示されます
+  </div>
+  <?php endif; ?>
+
   <!-- フィルタバー（GETメソッドで page パラメータを維持するため hidden を使用） -->
   <form action="index.php" method="get">
     <input type="hidden" name="page" value="home">
@@ -180,9 +220,18 @@ require __DIR__ . '/../includes/header.php';
     </div>
   <?php else: ?>
   <div class="card-grid">
-    <?php foreach ($display_areas as $area): ?>
-    <div class="area-card">
-      <div class="area-card-img"><span class="material-icons" style="font-size:3rem;">location_city</span></div>
+    <?php
+    $card_bg    = ['near' => 'linear-gradient(135deg,#e0e7ff,#c7d2fe)', 'cheap' => 'linear-gradient(135deg,#dcfce7,#bbf7d0)', 'livable' => 'linear-gradient(135deg,#cffafe,#a5f3fc)'];
+    $card_color = ['near' => '#4338ca', 'cheap' => '#15803d', 'livable' => '#0e7490'];
+    foreach ($display_areas as $area):
+        $mb = $area['badges'][0] ?? 'near';
+        $bg = $card_bg[$mb]    ?? $card_bg['near'];
+        $ic = $card_color[$mb] ?? $card_color['near'];
+    ?>
+    <div class="area-card" data-id="<?= (int)$area['id'] ?>">
+      <div class="area-card-img" style="background:<?= $bg ?>;">
+        <span class="material-icons" style="font-size:3rem;color:<?= $ic ?>;">location_city</span>
+      </div>
       <div class="area-card-body">
         <div class="area-card-title"><?= htmlspecialchars($area['name']) ?></div>
         <div class="area-card-meta">
@@ -204,6 +253,7 @@ require __DIR__ . '/../includes/header.php';
       </div>
     </div>
     <?php endforeach; ?>
+    <?php unset($mb, $bg, $ic); ?>
   </div>
   <?php endif; ?>
 
