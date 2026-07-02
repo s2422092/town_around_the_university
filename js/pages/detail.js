@@ -88,22 +88,43 @@ function initMap() {
     }
 }
 
-/* ── POI カード 3D チルト ── */
+/* ── POI カード 3D チルト（強め） ── */
 function initPoiCardTilt() {
     document.querySelectorAll('.poi-cat').forEach(card => {
+        /* シャインレイヤーを動的に挿入 */
+        const shine = document.createElement('div');
+        shine.className = 'poi-shine';
+        card.appendChild(shine);
+
         card.addEventListener('mouseenter', () => {
-            card.style.transition = 'transform 0.08s ease, box-shadow 0.08s ease';
+            card.style.transition = 'transform 0.06s ease, box-shadow 0.06s ease';
         });
         card.addEventListener('mousemove', e => {
             const r  = card.getBoundingClientRect();
-            const nx = (e.clientX - r.left  - r.width  / 2) / (r.width  / 2);
-            const ny = (e.clientY - r.top   - r.height / 2) / (r.height / 2);
+            const nx = (e.clientX - r.left  - r.width  / 2) / (r.width  / 2);  // -1〜1
+            const ny = (e.clientY - r.top   - r.height / 2) / (r.height / 2);  // -1〜1
+
+            /* チルト 14° + 浮き上がり + スケール */
             card.style.transform =
-                `perspective(700px) rotateX(${-ny * 7}deg) rotateY(${nx * 7}deg) translateY(-3px) scale(1.018)`;
+                `perspective(500px) rotateX(${-ny * 14}deg) rotateY(${nx * 14}deg) translateY(-8px) scale(1.04)`;
+
+            /* 傾きに連動した方向シャドウ */
+            card.style.boxShadow =
+                `${-nx * 20}px ${-ny * 20}px 48px rgba(0,0,0,0.55),
+                 ${nx * 4}px ${ny * 4}px 18px rgba(0,0,0,0.3)`;
+
+            /* マウス位置追従シャイン */
+            const px = ((nx + 1) / 2 * 100).toFixed(1);
+            const py = ((ny + 1) / 2 * 100).toFixed(1);
+            shine.style.background =
+                `radial-gradient(circle at ${px}% ${py}%, rgba(255,255,255,0.18) 0%, transparent 60%)`;
+            shine.style.opacity = '1';
         });
         card.addEventListener('mouseleave', () => {
-            card.style.transition = 'transform 0.5s ease, box-shadow 0.5s ease';
+            card.style.transition = 'transform 0.6s cubic-bezier(.23,1,.32,1), box-shadow 0.6s ease';
             card.style.transform  = '';
+            card.style.boxShadow  = '';
+            shine.style.opacity   = '0';
         });
     });
 }

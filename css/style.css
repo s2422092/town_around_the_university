@@ -583,6 +583,8 @@ footer {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
   gap: 1.1rem;
+  perspective: 1200px;
+  perspective-origin: 50% 30%;
 }
 
 .poi-cat {
@@ -592,8 +594,26 @@ footer {
   cursor: default;
   background: linear-gradient(150deg, #0f172a 0%, #1e293b 100%);
   border: 1px solid rgba(129,140,248,0.18);
-  box-shadow: 0 4px 24px rgba(0,0,0,0.45), inset 0 1px 0 rgba(255,255,255,0.04);
+  box-shadow:
+    0 8px 32px rgba(0,0,0,0.55),
+    0 2px 8px rgba(0,0,0,0.4),
+    inset 0 1px 0 rgba(255,255,255,0.07),
+    inset 0 -1px 0 rgba(0,0,0,0.3);
   transition: box-shadow 0.25s, border-color 0.25s;
+  /* 3D 変形の起点を中心に */
+  transform-style: preserve-3d;
+  will-change: transform;
+}
+
+/* マウス追従シャイン */
+.poi-shine {
+  position: absolute;
+  inset: 0;
+  border-radius: 16px;
+  pointer-events: none;
+  z-index: 10;
+  opacity: 0;
+  transition: opacity 0.3s;
 }
 
 /* ドット格子背景 */
@@ -626,16 +646,16 @@ footer {
 }
 
 /* カテゴリ別ボーダー・ホバーグロー */
-.poi-cat[data-poi-type="convenience"] { border-color: rgba(249,115,22,0.38); }
-.poi-cat[data-poi-type="convenience"]:hover { box-shadow: 0 10px 36px rgba(249,115,22,0.28), inset 0 1px 0 rgba(255,255,255,0.08); }
-.poi-cat[data-poi-type="supermarket"] { border-color: rgba(34,197,94,0.35); }
-.poi-cat[data-poi-type="supermarket"]:hover { box-shadow: 0 10px 36px rgba(34,197,94,0.25), inset 0 1px 0 rgba(255,255,255,0.08); }
-.poi-cat[data-poi-type="park"]        { border-color: rgba(20,184,166,0.35); }
-.poi-cat[data-poi-type="park"]:hover  { box-shadow: 0 10px 36px rgba(20,184,166,0.25), inset 0 1px 0 rgba(255,255,255,0.08); }
-.poi-cat[data-poi-type="hospital"]    { border-color: rgba(239,68,68,0.38); }
-.poi-cat[data-poi-type="hospital"]:hover { box-shadow: 0 10px 36px rgba(239,68,68,0.28), inset 0 1px 0 rgba(255,255,255,0.08); }
-.poi-cat[data-poi-type="police"]      { border-color: rgba(59,130,246,0.38); }
-.poi-cat[data-poi-type="police"]:hover { box-shadow: 0 10px 36px rgba(59,130,246,0.28), inset 0 1px 0 rgba(255,255,255,0.08); }
+.poi-cat[data-poi-type="convenience"] { border-color: rgba(249,115,22,0.5); }
+.poi-cat[data-poi-type="convenience"]:hover { border-color: rgba(249,115,22,0.85); }
+.poi-cat[data-poi-type="supermarket"] { border-color: rgba(34,197,94,0.45); }
+.poi-cat[data-poi-type="supermarket"]:hover { border-color: rgba(34,197,94,0.85); }
+.poi-cat[data-poi-type="park"]        { border-color: rgba(20,184,166,0.45); }
+.poi-cat[data-poi-type="park"]:hover  { border-color: rgba(20,184,166,0.85); }
+.poi-cat[data-poi-type="hospital"]    { border-color: rgba(239,68,68,0.5); }
+.poi-cat[data-poi-type="hospital"]:hover { border-color: rgba(239,68,68,0.85); }
+.poi-cat[data-poi-type="police"]      { border-color: rgba(59,130,246,0.5); }
+.poi-cat[data-poi-type="police"]:hover { border-color: rgba(59,130,246,0.85); }
 
 /* ヘッダー */
 .poi-cat-header {
