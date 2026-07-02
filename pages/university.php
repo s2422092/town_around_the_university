@@ -177,8 +177,22 @@ $page_js = 'university.js';
 require __DIR__ . '/../includes/header.php';
 ?>
 <script>window.CAMPUS_DATA = <?= json_encode($campus_data, JSON_UNESCAPED_UNICODE) ?>;</script>
-<datalist id="university-list"></datalist>
-<datalist id="campus-list"></datalist>
+
+<!-- 大学名サジェスト（PHP でサーバーサイド出力） -->
+<datalist id="university-list">
+<?php foreach (array_keys($campus_data) as $uname): ?>
+  <option value="<?= htmlspecialchars($uname) ?>">
+<?php endforeach; ?>
+</datalist>
+
+<!-- キャンパス名サジェスト（JS が動的に更新。初期値は現在の大学で出力） -->
+<datalist id="campus-list">
+<?php if (!empty($form['university_name']) && isset($campus_data[$form['university_name']])): ?>
+  <?php foreach ($campus_data[$form['university_name']] as $c): ?>
+    <option value="<?= htmlspecialchars($c['campus']) ?>">
+  <?php endforeach; ?>
+<?php endif; ?>
+</datalist>
 
 <main>
 
@@ -207,7 +221,7 @@ require __DIR__ . '/../includes/header.php';
           <input type="text" id="university_name" name="university_name"
                  list="university-list"
                  value="<?= htmlspecialchars($form['university_name']) ?>"
-                 placeholder="例：東京大学" autocomplete="off" required>
+                 placeholder="例：東京大学" required>
         </div>
 
         <div class="form-group">
@@ -215,7 +229,7 @@ require __DIR__ . '/../includes/header.php';
           <input type="text" id="campus_name" name="campus_name"
                  list="campus-list"
                  value="<?= htmlspecialchars($form['campus_name']) ?>"
-                 placeholder="例：本郷キャンパス" autocomplete="off" required>
+                 placeholder="例：本郷キャンパス" required>
           <span class="form-hint">大学名を入力するとキャンパス候補が表示されます。</span>
         </div>
 
