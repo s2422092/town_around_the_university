@@ -695,6 +695,20 @@ footer {
   text-align: center;
 }
 
+/* 地図上の直線距離ラベル */
+.map-dist-label {
+  display: inline-block;
+  background: rgba(220, 38, 38, 0.88);
+  color: #fff;
+  font-size: 0.72rem;
+  font-weight: 700;
+  padding: 0.18rem 0.5rem;
+  border-radius: 20px;
+  white-space: nowrap;
+  box-shadow: 0 1px 4px rgba(0,0,0,0.25);
+  letter-spacing: 0.03em;
+}
+
 .score-sub {
   font-size: 0.72rem;
   color: var(--color-text-muted);

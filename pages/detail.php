@@ -185,9 +185,10 @@ $js_data = [
         'lng'  => (float)$p['lng'],
     ], $pois)),
     'campus' => ($registered && $campus_lat !== null) ? [
-        'lat'  => $campus_lat,
-        'lng'  => $campus_lng,
-        'name' => trim(($registered['university_name'] ?? '') . ' ' . ($registered['campus_name'] ?? '')),
+        'lat'         => $campus_lat,
+        'lng'         => $campus_lng,
+        'name'        => trim(($registered['university_name'] ?? '') . ' ' . ($registered['campus_name'] ?? '')),
+        'distance_km' => isset($scores['distance_km']) ? round((float)$scores['distance_km'], 1) : null,
     ] : null,
 ];
 

@@ -50,26 +50,41 @@ function initMap() {
             .bindPopup(`<span class="material-icons" style="vertical-align:middle;font-size:1rem;">${icon}</span> <b>${poi.name}</b>`);
     });
 
-    // キャンパスマーカー + 直線
+    // キャンパスマーカー（赤ピン） + 直線 + 距離ラベル
     if (campus) {
+        // 赤い location_on ピン
         const campusIcon = L.divIcon({
-            html: '<span class="leaflet-poi-icon material-icons">account_balance</span>',
+            html: '<span class="material-icons" style="color:#dc2626;font-size:2.4rem;line-height:1;display:block;filter:drop-shadow(0 2px 6px rgba(220,38,38,0.5));">location_on</span>',
             className: '',
-            iconSize: [28, 28],
-            iconAnchor: [14, 14],
+            iconSize:   [38, 38],
+            iconAnchor: [19, 38],
         });
         L.marker([campus.lat, campus.lng], { icon: campusIcon })
             .addTo(map)
-            .bindPopup(`<span class="material-icons" style="vertical-align:middle;font-size:1rem;">account_balance</span> <b>${campus.name || '大学キャンパス'}</b>`);
+            .bindPopup(`<span class="material-icons" style="vertical-align:middle;font-size:1rem;color:#dc2626;">location_on</span> <b>${campus.name || '大学キャンパス'}</b>`);
 
+        // 赤い直線
         L.polyline([[campus.lat, campus.lng], [lat, lng]], {
-            color: '#2563eb',
-            weight: 2,
-            dashArray: '6 4',
-            opacity: 0.65,
+            color:     '#dc2626',
+            weight:    2,
+            dashArray: '7 5',
+            opacity:   0.75,
         }).addTo(map);
 
-        map.fitBounds([[campus.lat, campus.lng], [lat, lng]], { padding: [50, 50] });
+        // 直線の中点に距離ラベル
+        if (campus.distance_km != null) {
+            const midLat = (campus.lat + lat) / 2;
+            const midLng = (campus.lng + lng) / 2;
+            const labelIcon = L.divIcon({
+                html: `<span class="map-dist-label">${campus.distance_km} km</span>`,
+                className: '',
+                iconSize:   [70, 24],
+                iconAnchor: [35, 12],
+            });
+            L.marker([midLat, midLng], { icon: labelIcon, interactive: false }).addTo(map);
+        }
+
+        map.fitBounds([[campus.lat, campus.lng], [lat, lng]], { padding: [60, 60] });
     }
 }
 
