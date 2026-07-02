@@ -1,13 +1,13 @@
 /* detail.js — エリア詳細ページ */
 
 document.addEventListener('DOMContentLoaded', () => {
-    // Leaflet が CDN からまだ届いていない場合に少し待ってリトライする
     if (typeof L === 'undefined') {
         setTimeout(initMap, 300);
     } else {
         initMap();
     }
     animateScores();
+    initPoiCardTilt();
 });
 
 function initMap() {
@@ -86,6 +86,26 @@ function initMap() {
 
         map.fitBounds([[campus.lat, campus.lng], [lat, lng]], { padding: [60, 60] });
     }
+}
+
+/* ── POI カード 3D チルト ── */
+function initPoiCardTilt() {
+    document.querySelectorAll('.poi-cat').forEach(card => {
+        card.addEventListener('mouseenter', () => {
+            card.style.transition = 'transform 0.08s ease, box-shadow 0.08s ease';
+        });
+        card.addEventListener('mousemove', e => {
+            const r  = card.getBoundingClientRect();
+            const nx = (e.clientX - r.left  - r.width  / 2) / (r.width  / 2);
+            const ny = (e.clientY - r.top   - r.height / 2) / (r.height / 2);
+            card.style.transform =
+                `perspective(700px) rotateX(${-ny * 7}deg) rotateY(${nx * 7}deg) translateY(-3px) scale(1.018)`;
+        });
+        card.addEventListener('mouseleave', () => {
+            card.style.transition = 'transform 0.5s ease, box-shadow 0.5s ease';
+            card.style.transform  = '';
+        });
+    });
 }
 
 function animateScores() {
