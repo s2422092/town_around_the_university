@@ -33,10 +33,16 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 $error   = true;
             } else {
                 $hash = password_hash($upass, PASSWORD_DEFAULT);
-                $ins  = pg_query_params($db, 'INSERT INTO users (uname, upass) VALUES ($1, $2)', [$uname, $hash]);
-                if ($ins) {
+                $ins  = pg_query_params($db,
+                    'INSERT INTO users (uname, upass) VALUES ($1, $2) RETURNING user_id',
+                    [$uname, $hash]
+                );
+                if ($ins && pg_num_rows($ins) > 0) {
+                    /* 登録完了。ログインはせず pending に仮保存して大学情報入力へ */
+                    $_SESSION['pending_user_id']  = (int) pg_fetch_result($ins, 0, 'user_id');
+                    $_SESSION['pending_username'] = $uname;
                     pg_close($db);
-                    header('Location: index.php?page=login&registered=1');
+                    header('Location: index.php?page=university&setup=1');
                     exit;
                 }
                 $message = 'ユーザー登録に失敗しました。';
@@ -59,12 +65,6 @@ require __DIR__ . '/../includes/header.php';
       <h1>新規登録</h1>
       <p>アカウントを作成して、エリア検索を始めましょう。</p>
     </div>
-
-    <?php if (!$error && isset($_GET['registered'])): ?>
-      <div class="notice" style="background:#dcfce7;border-color:#86efac;color:#166534;">
-        登録が完了しました！ログインしてください。
-      </div>
-    <?php endif; ?>
 
     <?php if ($message !== ''): ?>
       <div class="notice" style="<?= $error

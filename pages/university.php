@@ -111,7 +111,14 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 'radius'          => (int) $form['radius'],
             ];
 
-            /* 4. ログイン済みなら user_preferences にも永続保存 */
+            /* 4. 新規登録フロー（pending）なら自動ログインに昇格 */
+            if (!empty($_SESSION['pending_user_id'])) {
+                $_SESSION['user_id']  = $_SESSION['pending_user_id'];
+                $_SESSION['username'] = $_SESSION['pending_username'] ?? '';
+                unset($_SESSION['pending_user_id'], $_SESSION['pending_username']);
+            }
+
+            /* 5. ログイン済み（または直前に昇格）なら user_preferences に永続保存 */
             if (!empty($_SESSION['user_id'])) {
                 pg_query_params($db, '
                     INSERT INTO user_preferences
@@ -196,8 +203,15 @@ require __DIR__ . '/../includes/header.php';
 
 <main>
 
+  <?php if (isset($_GET['setup'])): ?>
+  <div class="notice" style="background:#dcfce7;border-color:#86efac;color:#166534;">
+    <span class="material-icons mi-sm">check_circle</span>
+    アカウントを作成しました。続けて通うキャンパスと希望条件を登録しましょう。
+  </div>
+  <?php endif; ?>
+
   <div class="page-hero">
-    <h1>大学情報の入力</h1>
+    <h1><?= isset($_GET['setup']) ? '大学情報を登録しよう' : '大学情報の入力' ?></h1>
     <p>通うキャンパスと希望条件を登録してください。エリア比較に使用します。</p>
   </div>
 
