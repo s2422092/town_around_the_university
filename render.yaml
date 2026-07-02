@@ -1,0 +1,16 @@
+services:
+  - type: web
+    name: town-around-the-university
+    env: docker
+    plan: free
+    envVars:
+      - key: DATABASE_URL
+        fromDatabase:
+          name: town-around-the-university-db
+          property: connectionString
+    healthCheckPath: /index.php
+
+databases:
+  - name: town-around-the-university-db
+    plan: free
+    databaseName: town_around_the_university

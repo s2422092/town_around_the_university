@@ -39,28 +39,35 @@ function load_env(string $path): void
  */
 function db_connect()
 {
-    // プロジェクトルートの .env を読む（何度呼ばれても一度だけ）
     static $loaded = false;
     if (!$loaded) {
         load_env(__DIR__ . '/../.env');
         $loaded = true;
     }
 
-    $host     = $_ENV['DB_HOST']     ?? 'localhost';
-    $port     = $_ENV['DB_PORT']     ?? '5432';
-    $dbname   = $_ENV['DB_NAME']     ?? '';
-    $user     = $_ENV['DB_USER']     ?? '';
-    $password = $_ENV['DB_PASSWORD'] ?? '';
-
-    $dsn = "host={$host} port={$port} dbname={$dbname} user={$user}";
-    if ($password !== '') {
-        $dsn .= " password={$password}";
+    // Render 等の DATABASE_URL を優先（postgres://user:pass@host:port/dbname）
+    $database_url = $_ENV['DATABASE_URL'] ?? getenv('DATABASE_URL') ?: null;
+    if ($database_url) {
+        $p   = parse_url($database_url);
+        $dsn = 'host='     . ($p['host'] ?? 'localhost')
+             . ' port='    . ($p['port'] ?? 5432)
+             . ' dbname='  . ltrim($p['path'] ?? '', '/')
+             . ' user='    . ($p['user'] ?? '')
+             . ' password=' . ($p['pass'] ?? '');
+    } else {
+        $host     = $_ENV['DB_HOST']     ?? getenv('DB_HOST')     ?: 'localhost';
+        $port     = $_ENV['DB_PORT']     ?? getenv('DB_PORT')     ?: '5432';
+        $dbname   = $_ENV['DB_NAME']     ?? getenv('DB_NAME')     ?: '';
+        $user     = $_ENV['DB_USER']     ?? getenv('DB_USER')     ?: '';
+        $password = $_ENV['DB_PASSWORD'] ?? getenv('DB_PASSWORD') ?: '';
+        $dsn = "host={$host} port={$port} dbname={$dbname} user={$user}";
+        if ($password !== '') $dsn .= " password={$password}";
     }
 
     $conn = pg_connect($dsn);
     if (!$conn) {
         throw new RuntimeException(
-            '.env の接続情報を確認してください。pg_connect に失敗しました。'
+            'pg_connect に失敗しました。DATABASE_URL または DB_* 環境変数を確認してください。'
         );
     }
     return $conn;
