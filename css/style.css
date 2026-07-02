@@ -706,31 +706,84 @@ footer {
   gap: 0.25rem;
 }
 
-/* ── 希望条件テーブル ─────────────────── */
-.pref-table {
-  width: 100%;
-  border-collapse: collapse;
-  font-size: 0.9rem;
+/* ── 希望条件カードグリッド ───────────── */
+.pref-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 0.875rem;
+  margin: 1.25rem 0;
 }
 
-.pref-table th,
-.pref-table td {
-  padding: 0.7rem 0.9rem;
-  border-bottom: 1px solid var(--color-border);
-  vertical-align: middle;
+.pref-card {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  padding: 1rem 1.1rem;
+  background: var(--color-bg);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius);
+  transition: box-shadow 0.18s, transform 0.18s;
 }
 
-.pref-table th {
-  width: 9rem;
+.pref-card:hover {
+  box-shadow: var(--shadow-md);
+  transform: translateY(-1px);
+}
+
+.pref-card-icon {
+  width: 46px;
+  height: 46px;
+  border-radius: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.pref-card-icon .material-icons {
+  font-size: 1.4rem;
+  color: #fff;
+}
+
+.pref-card-body {
+  flex: 1;
+  min-width: 0;
+}
+
+.pref-card-label {
+  font-size: 0.7rem;
   color: var(--color-text-muted);
   font-weight: 600;
-  white-space: nowrap;
-  text-align: left;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  margin-bottom: 0.2rem;
 }
 
-.pref-table tr:last-child th,
-.pref-table tr:last-child td {
-  border-bottom: none;
+.pref-card-value {
+  font-size: 1.1rem;
+  font-weight: 700;
+  color: var(--color-text);
+  line-height: 1.3;
+}
+
+.pref-card-unit {
+  font-size: 0.78rem;
+  font-weight: 400;
+  color: var(--color-text-muted);
+  margin-left: 0.2rem;
+}
+
+.pref-card-badges {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.3rem;
+  font-size: 0.88rem;
+}
+
+@media (max-width: 560px) {
+  .pref-grid {
+    grid-template-columns: 1fr;
+  }
 }
 
 /* ── Vanta背景セクション ─────────────── */

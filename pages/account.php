@@ -180,42 +180,82 @@ require __DIR__ . '/../includes/header.php';
         </div>
       </div>
 
-      <!-- 希望条件テーブル -->
-      <table class="pref-table">
-        <tbody>
-          <tr>
-            <th><span class="material-icons mi-xs">payments</span> 家賃上限</th>
-            <td><?= $registered['rent_max'] !== null
-                ? '<strong>' . number_format($registered['rent_max'] / 10000, 0) . ' 万円</strong> / 月'
-                : '上限なし' ?></td>
-          </tr>
-          <tr>
-            <th><span class="material-icons mi-xs">star</span> 優先カテゴリ</th>
-            <td><?php
-              $badge_class = ['cheap'=>'badge-cheap','near'=>'badge-near','livable'=>'badge-livable'];
-              $p = $registered['priority'] ?? 'near';
-              echo '<span class="badge ' . ($badge_class[$p] ?? '') . '">' . htmlspecialchars($badge_labels[$p] ?? '近さ優先') . '</span>';
-            ?></td>
-          </tr>
-          <tr>
-            <th><span class="material-icons mi-xs">place</span> 検索範囲</th>
-            <td><strong><?= (int)($registered['radius'] ?? 20) ?> km</strong> 以内</td>
-          </tr>
-          <tr>
-            <th><span class="material-icons mi-xs">directions_transit</span> 交通手段</th>
-            <td><?php
-              $sel = array_map(fn($t) => $transport_labels[$t] ?? $t, (array)($registered['transport'] ?? []));
-              if ($sel) {
-                  foreach ($sel as $t) {
-                      echo '<span class="badge badge-near" style="margin-right:0.3rem;">' . htmlspecialchars($t) . '</span>';
-                  }
-              } else {
-                  echo '<span class="text-muted">未選択</span>';
-              }
-            ?></td>
-          </tr>
-        </tbody>
-      </table>
+      <!-- 希望条件カードグリッド -->
+      <div class="pref-grid">
+
+        <!-- 家賃上限 -->
+        <div class="pref-card">
+          <div class="pref-card-icon" style="background:linear-gradient(135deg,#7c3aed,#a78bfa);">
+            <span class="material-icons">payments</span>
+          </div>
+          <div class="pref-card-body">
+            <div class="pref-card-label">家賃上限</div>
+            <div class="pref-card-value">
+              <?php if ($registered['rent_max'] !== null): ?>
+                <?= number_format($registered['rent_max'] / 10000, 0) ?><span class="pref-card-unit">万円 / 月</span>
+              <?php else: ?>
+                <span style="font-size:0.95rem; font-weight:500;">上限なし</span>
+              <?php endif; ?>
+            </div>
+          </div>
+        </div>
+
+        <!-- 優先カテゴリ -->
+        <?php
+          $p = $registered['priority'] ?? 'near';
+          $p_grad = [
+            'cheap'   => 'linear-gradient(135deg,#f59e0b,#fbbf24)',
+            'near'    => 'linear-gradient(135deg,#4f46e5,#818cf8)',
+            'livable' => 'linear-gradient(135deg,#0d9488,#2dd4bf)',
+          ];
+          $p_icon = ['cheap' => 'savings', 'near' => 'near_me', 'livable' => 'favorite'];
+        ?>
+        <div class="pref-card">
+          <div class="pref-card-icon" style="background:<?= $p_grad[$p] ?? $p_grad['near'] ?>;">
+            <span class="material-icons"><?= $p_icon[$p] ?? 'star' ?></span>
+          </div>
+          <div class="pref-card-body">
+            <div class="pref-card-label">優先カテゴリ</div>
+            <div class="pref-card-value"><?= htmlspecialchars($badge_labels[$p] ?? '近さ優先') ?></div>
+          </div>
+        </div>
+
+        <!-- 検索範囲 -->
+        <div class="pref-card">
+          <div class="pref-card-icon" style="background:linear-gradient(135deg,#059669,#34d399);">
+            <span class="material-icons">explore</span>
+          </div>
+          <div class="pref-card-body">
+            <div class="pref-card-label">検索範囲</div>
+            <div class="pref-card-value">
+              <?= (int)($registered['radius'] ?? 20) ?><span class="pref-card-unit">km 以内</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- 交通手段 -->
+        <div class="pref-card">
+          <div class="pref-card-icon" style="background:linear-gradient(135deg,#0284c7,#38bdf8);">
+            <span class="material-icons">directions_transit</span>
+          </div>
+          <div class="pref-card-body">
+            <div class="pref-card-label">交通手段</div>
+            <div class="pref-card-value pref-card-badges">
+              <?php
+                $sel = (array)($registered['transport'] ?? []);
+                if ($sel) {
+                    foreach ($sel as $t) {
+                        echo '<span class="badge badge-near">' . htmlspecialchars($transport_labels[$t] ?? $t) . '</span>';
+                    }
+                } else {
+                    echo '<span class="text-muted" style="font-size:0.88rem;">未選択</span>';
+                }
+              ?>
+            </div>
+          </div>
+        </div>
+
+      </div>
 
       <div style="display:flex; gap:0.75rem; flex-wrap:wrap; margin-top:1.25rem;">
         <a href="index.php?page=university" class="btn btn-outline">
